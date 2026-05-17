@@ -1,0 +1,134 @@
+name: "🐛 Bug report / Hlášení chyby"
+description: "Report a bug in the Acond Heat Pump integration. / Nahlásit chybu v integraci Acond Heat Pump."
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees:
+  - pavorlechre
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🇨🇿 Než vyplníš formulář
+        Děkujeme za hlášení! Aby ti šlo pomoct rychle, prosíme o vyplnění všech polí. Pole označená `*` jsou povinná.
+
+        ## 🇬🇧 Before you fill out this form
+        Thanks for reporting! To help you quickly, please fill in all fields. Fields marked with `*` are required.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: "Předkontrolní seznam / Prerequisites"
+      description: "Před odesláním issue prosím potvrď: / Before submitting, please confirm:"
+      options:
+        - label: "Prohledal jsem [existující issues](https://github.com/pavorlechre/homeassistant-acond/issues) a problém zde ještě není. / I have searched [existing issues](https://github.com/pavorlechre/homeassistant-acond/issues) and this problem is not yet reported."
+          required: true
+        - label: "Používám nejnovější verzi integrace dostupnou v HACS. / I am using the latest version of the integration available in HACS."
+          required: true
+        - label: "Přečetl jsem si README a Troubleshooting sekci. / I have read the README and Troubleshooting section."
+          required: true
+
+  - type: input
+    id: integration_version
+    attributes:
+      label: "Verze integrace * / Integration version *"
+      description: "Kterou verzi integrace používáš? (HACS → Acond Heat Pump → Information) / Which version of the integration are you using?"
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: ha_version
+    attributes:
+      label: "Verze Home Assistant * / Home Assistant version *"
+      description: "Settings → About / Nastavení → O aplikaci"
+      placeholder: "2026.4.4"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: hp_series
+    attributes:
+      label: "Série tepelného čerpadla * / Heat pump series *"
+      description: "Jaká je série tvého TČ? / What is your heat pump series?"
+      options:
+        - "Grandis / Economis"
+        - "PRO"
+        - "Nevím / I don't know"
+    validations:
+      required: true
+
+  - type: input
+    id: hp_firmware
+    attributes:
+      label: "Verze firmware TČ / Heat pump firmware version"
+      description: "Volitelné. Verze firmware najdeš na panelu TČ. / Optional. Firmware version is shown on the heat pump's panel."
+      placeholder: "např. v4.3.3.23 / e.g. v4.3.3.23"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Popis problému * / Problem description *"
+      description: "Co se děje? / What is happening?"
+      placeholder: "Po restartu HA se integrace nepřipojí k TČ. / After HA restart, the integration does not connect to the heat pump."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: "Očekávané chování * / Expected behavior *"
+      description: "Co mělo nastat místo toho? / What should have happened instead?"
+      placeholder: "Integrace se připojí během 30 sekund po startu HA. / The integration connects within 30 seconds after HA starts."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: "Kroky k reprodukci * / Steps to reproduce *"
+      description: "Jak chybu vyvolat? / How to trigger the bug?"
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Logy z Home Assistant * / Home Assistant logs *"
+      description: |
+        Settings → System → Logs → filtruj na `acond` / Nastavení → Systém → Logy → filtruj na `acond`.
+        Vlož sem **kompletní log integrace**, ne jen jeden řádek. / Paste the **complete integration log**, not just a single line.
+      render: shell
+      placeholder: |
+        2026-05-17 10:00:00 ERROR (MainThread) [custom_components.acond] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: ai_context
+    attributes:
+      label: "AI kontext / AI context"
+      description: |
+        Vygeneruj AI kontext (button v zařízení Acond → Generate AI Context).
+        Stačí vložit obsah souboru nebo přiložit soubor přetažením do tohoto pole.
+        ⚠️ Před odesláním zkontroluj, že neobsahuje citlivé údaje (tokeny, IP adresy, atd.).
+
+        Generate AI context (button in Acond device → Generate AI Context).
+        Paste the file content or attach the file by dragging it into this field.
+        ⚠️ Before submitting, check that it does not contain sensitive data (tokens, IPs, etc.).
+
+  - type: markdown
+    attributes:
+      value: |
+        ### 📷 Screenshoty / Screenshots
+        Pokud máš screenshoty, můžeš je **přetáhnout přímo do následujícího pole**. GitHub je nahraje automaticky.
+        If you have screenshots, **drag them directly into the field below**. GitHub will upload them automatically.
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Další kontext / Additional context"
+      description: "Cokoli dalšího, co by mohlo pomoct (screenshoty, konfigurace, atd.) / Anything else that might help (screenshots, config, etc.)"
