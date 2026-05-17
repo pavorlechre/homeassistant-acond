@@ -1,1 +1,78 @@
+name: "💡 Feature request / Návrh funkce"
+description: "Suggest a new feature or improvement. / Navrhni novou funkci nebo vylepšení."
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+assignees:
+  - pavorlechre
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Návrh funkce / Feature request
 
+        🇨🇿 **CS:** Děkujeme za nápad! Krátké, jasné návrhy vedou k rychlejší realizaci. Pole s červenou hvězdičkou jsou povinná.
+
+        🇬🇧 **EN:** Thanks for the suggestion! Short, clear proposals lead to faster implementation. Fields with a red asterisk are required.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: "Předkontrolní seznam / Prerequisites"
+      description: "Před odesláním návrhu prosím potvrď: / Before submitting, please confirm:"
+      options:
+        - label: "Prohledal jsem [existující issues](https://github.com/pavorlechre/homeassistant-acond/issues) a tento návrh zde ještě není. / I have searched [existing issues](https://github.com/pavorlechre/homeassistant-acond/issues) and this suggestion is not yet there."
+          required: true
+        - label: "Přečetl jsem si README a tato funkce v integraci ještě není. / I have read the README and this feature is not in the integration yet."
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Jaký problém řešíš? / What problem are you trying to solve?"
+      description: |
+        Popiš situaci, kdy ti aktuální stav integrace nevyhovuje. / Describe a situation where the current integration doesn't meet your needs.
+      placeholder: |
+        Když je venku pod -10°C, chci automaticky zvýšit teplotu zpátečky o 2°C, abych předešel přetížení... 
+        When the outdoor temperature drops below -10°C, I want to automatically...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: "Navrhované řešení / Proposed solution"
+      description: |
+        Jak si představuješ řešení? Nemusí být technicky detailní – stačí v hrubých rysech. / How do you envision the solution? Doesn't have to be technically detailed – a rough sketch is fine.
+      placeholder: |
+        Přidat nový sensor "Doporučená teplota zpátečky", který se počítá z venkovní teploty podle ekviterm křivky...
+        Add a new sensor "Recommended return water temperature" that calculates from outdoor temperature using an equithermal curve...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Zvážil/a jsi alternativy? / Have you considered alternatives?"
+      description: |
+        Existuje už jiný způsob, jak to vyřešit? Šablona, automatizace, jiná integrace? / Is there another way to solve it already? A template, automation, other integration?
+      placeholder: |
+        Zkoušel/a jsem to řešit přes template sensor v configuration.yaml, ale...
+        I tried solving it through a template sensor in configuration.yaml, but...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Jak moc to potřebuješ? / How much do you need this?"
+      description: "Subjektivní odhad. Pomáhá s prioritizací. / Subjective estimate. Helps with prioritization."
+      options:
+        - "Nice to have (bylo by fajn, ale klidně počká) / Nice to have (would be nice, can wait)"
+        - "Užitečné (rád bych to měl v dohledné době) / Useful (would like it soon)"
+        - "Důležité (blokuje mi to konkrétní use case) / Important (blocks a specific use case for me)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: "Další kontext / Additional context"
+      description: "Screenshoty, odkazy na podobné řešení v jiných integracích, citace z protokolu Acond, atd. / Screenshots, links to similar solutions in other integrations, citations from Acond protocol, etc."
