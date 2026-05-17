@@ -1,9 +1,9 @@
 blank_issues_enabled: false
 
 contact_links:
-  - name: 🇨🇿 Česká dokumentace
+  - name: "📘 Česká dokumentace / Czech documentation"
     url: https://github.com/pavorlechre/homeassistant-acond/blob/main/README.cs.md
-    about: Dokumentace integrace v češtině.
-  - name: 💬 Home Assistant Community Forum
+    about: "Dokumentace integrace v češtině. / Integration documentation in Czech."
+  - name: "💬 Home Assistant Community Forum"
     url: https://community.home-assistant.io/
-    about: Pro obecné dotazy ohledně Home Assistant, ne přímo k integraci.
+    about: "Pro obecné dotazy o HA, ne přímo k integraci. / For general HA questions, not specific to this integration."
