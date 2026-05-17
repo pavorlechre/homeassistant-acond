@@ -216,3 +216,36 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ============================================================================
+# Acond Integration – project-specific ignores
+# ============================================================================
+
+# Acond protokol – copyrighted dokumenty výrobce, nesmí být public
+AC781150*.pdf
+*AcondProtocol*.pdf
+acond_registry*.xlsx
+
+# Stará YAML modbus konfigurace – může obsahovat secrets
+configuration*.yaml
+old_modbus*.yaml
+
+# Interní vývojářské poznámky – jen pro Claude projekt
+DECISIONS*.md
+PROJECT_INSTRUCTIONS*.md
+ai_context_full*.md
+acond_ai_context*.md
+full_*.md
+
+# Home Assistant specifické – kdyby někdo nakopíroval HA config omylem
+secrets.yaml
+.storage/
+home-assistant.log
+home-assistant_v2.db
+
+# Operační systém / editor backup (doplnění Python šablony)
+*.bak
+*~
+
+# Soubory s logem
+*.log
