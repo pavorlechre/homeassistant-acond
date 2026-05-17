@@ -8,11 +8,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        ## 🇨🇿 Než vyplníš formulář
-        Děkujeme za hlášení! Aby ti šlo pomoct rychle, prosíme o vyplnění všech polí. Pole označená `*` jsou povinná.
+        ## Než vyplníš formulář / Before you fill out this form
 
-        ## 🇬🇧 Before you fill out this form
-        Thanks for reporting! To help you quickly, please fill in all fields. Fields marked with `*` are required.
+        🇨🇿 **CS:** Děkujeme za hlášení! Aby ti šlo pomoct rychle, prosíme o vyplnění všech polí. Pole s červenou hvězdičkou jsou povinná.
+
+        🇬🇧 **EN:** Thanks for reporting! To help you quickly, please fill in all fields. Fields with a red asterisk are required.
 
   - type: checkboxes
     id: prerequisites
@@ -30,7 +30,7 @@ body:
   - type: input
     id: integration_version
     attributes:
-      label: "Verze integrace * / Integration version *"
+      label: "Verze integrace / Integration version"
       description: "Kterou verzi integrace používáš? (HACS → Acond Heat Pump → Information) / Which version of the integration are you using?"
       placeholder: "0.1.0"
     validations:
@@ -39,7 +39,7 @@ body:
   - type: input
     id: ha_version
     attributes:
-      label: "Verze Home Assistant * / Home Assistant version *"
+      label: "Verze Home Assistant / Home Assistant version"
       description: "Settings → About / Nastavení → O aplikaci"
       placeholder: "2026.4.4"
     validations:
@@ -48,7 +48,7 @@ body:
   - type: dropdown
     id: hp_series
     attributes:
-      label: "Série tepelného čerpadla * / Heat pump series *"
+      label: "Série tepelného čerpadla / Heat pump series"
       description: "Jaká je série tvého TČ? / What is your heat pump series?"
       options:
         - "Grandis / Economis"
@@ -67,7 +67,7 @@ body:
   - type: textarea
     id: description
     attributes:
-      label: "Popis problému * / Problem description *"
+      label: "Popis problému / Problem description"
       description: "Co se děje? / What is happening?"
       placeholder: "Po restartu HA se integrace nepřipojí k TČ. / After HA restart, the integration does not connect to the heat pump."
     validations:
@@ -76,7 +76,7 @@ body:
   - type: textarea
     id: expected
     attributes:
-      label: "Očekávané chování * / Expected behavior *"
+      label: "Očekávané chování / Expected behavior"
       description: "Co mělo nastat místo toho? / What should have happened instead?"
       placeholder: "Integrace se připojí během 30 sekund po startu HA. / The integration connects within 30 seconds after HA starts."
     validations:
@@ -85,7 +85,7 @@ body:
   - type: textarea
     id: reproduce
     attributes:
-      label: "Kroky k reprodukci * / Steps to reproduce *"
+      label: "Kroky k reprodukci / Steps to reproduce"
       description: "Jak chybu vyvolat? / How to trigger the bug?"
       value: |
         1. 
@@ -97,7 +97,7 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: "Logy z Home Assistant * / Home Assistant logs *"
+      label: "Logy z Home Assistant / Home Assistant logs"
       description: |
         Settings → System → Logs → filtruj na `acond` / Nastavení → Systém → Logy → filtruj na `acond`.
         Vlož sem **kompletní log integrace**, ne jen jeden řádek. / Paste the **complete integration log**, not just a single line.
