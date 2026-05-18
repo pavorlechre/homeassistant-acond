@@ -1,13 +1,13 @@
 {
   "domain": "acond",
   "name": "Acond Heat Pump",
-  "version": "0.1.0",
-  "documentation": "https://github.com/pavorlechre/homeassistant-acond",
-  "issue_tracker": "https://github.com/pavorlechre/homeassistant-acond/issues",
-  "codeowners": ["@pavorlechre"],
-  "iot_class": "local_polling",
-  "integration_type": "hub",
-  "config_flow": true,
   "after_dependencies": ["hassio"],
-  "requirements": ["pymodbus>=3.6.9"]
+  "codeowners": ["@pavorlechre"],
+  "config_flow": true,
+  "documentation": "https://github.com/pavorlechre/homeassistant-acond",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/pavorlechre/homeassistant-acond/issues",
+  "requirements": ["pymodbus>=3.6.9"],
+  "version": "0.1.0"
 }
