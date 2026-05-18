@@ -1,0 +1,38 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Nastavení Acond tepelného čerpadla",
+        "description": "Zadejte IP adresu tepelného čerpadla a vyberte sérii.",
+        "data": {
+          "host": "IP adresa",
+          "hp_series": "Série tepelného čerpadla"
+        },
+        "data_description": {
+          "host": "IP adresa tepelného čerpadla v síti (např. 192.168.1.100)",
+          "hp_series": "Grandis / Economis = otáčky kompresoru (rpm)\nPRO = výkon kompresoru (W)"
+        }
+      }
+    },
+    "error": {
+      "invalid_host": "Neplatná IP adresa"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Úprava IP adresy",
+        "description": "Pokud se IP adresa tepelného čerpadla v síti změnila, můžete ji zde upravit bez nutnosti reinstalace integrace. Integrace se automaticky znovu připojí na novou adresu.\n\nSérie tepelného čerpadla není editovatelná – pro její změnu je nutná reinstalace.",
+        "data": {
+          "host": "IP adresa"
+        },
+        "data_description": {
+          "host": "Nová IP adresa tepelného čerpadla v síti (např. 192.168.1.100)"
+        }
+      }
+    },
+    "error": {
+      "invalid_host": "Neplatná IP adresa"
+    }
+  }
+}

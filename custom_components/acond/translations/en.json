@@ -1,0 +1,38 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Acond Heat Pump Setup",
+        "description": "Enter the IP address of your heat pump and select the series.",
+        "data": {
+          "host": "IP Address",
+          "hp_series": "Heat pump series"
+        },
+        "data_description": {
+          "host": "IP address of the heat pump on your network (e.g. 192.168.1.100)",
+          "hp_series": "Grandis / Economis = compressor speed (rpm)\nPRO = compressor power (W)"
+        }
+      }
+    },
+    "error": {
+      "invalid_host": "Invalid IP address"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Edit IP address",
+        "description": "If the heat pump's IP address on your network has changed, you can update it here without reinstalling the integration. The integration will automatically reconnect to the new address.\n\nHeat pump series cannot be edited – changing it requires a reinstall.",
+        "data": {
+          "host": "IP Address"
+        },
+        "data_description": {
+          "host": "New IP address of the heat pump on your network (e.g. 192.168.1.100)"
+        }
+      }
+    },
+    "error": {
+      "invalid_host": "Invalid IP address"
+    }
+  }
+}

@@ -1,0 +1,1363 @@
+###############################################################################
+# Acond Heat Pump – Lovelace dashboard
+# v0.25 (15.5.2026)
+#
+# Změny oproti v0.24:
+#  - Sekce "Přizpůsobení dashboardu" v Nápovědě OPRAVENA: původní návod
+#    skrz "Nový dashboard z YAML konfigurace" by uživatele zavedl do
+#    identické pasti (yaml mode = UI editor opět zakázaný). Nový postup
+#    používá storage mode dashboard + Editor kódu nastavení.
+#
+# Změny oproti v0.23 (v0.24):
+#  - "Aplikace Acond" – iframe zrušen, jen tlačítko v novém okně
+#  - "Nápověda" – přidána sekce "Přizpůsobení dashboardu"
+#
+# Pořadí views: Pohled → Přehled → Ovládání → Energie → Grafy →
+#               Diagnostika → Aplikace Acond → Nápověda
+#
+# Konvence entity_id:
+#   sensor.acond_{address}_{key}
+#   binary_sensor.acond_{address}_{key}
+#   number.acond_{address}_{key}
+#   switch.acond_{address}_{key}
+#   select.acond_{address}_{key}
+#   button.acond_{address}_{key}
+#
+# Service buttony (mimo Modbus):
+#   button.acond_ai_context_acond
+#   button.acond_ai_context_full
+#
+# Nasazení: tento soubor uložit jako
+#   /config/custom_components/acond/lovelace/acond_dashboard.yaml
+###############################################################################
+
+title: Acond TČ
+views:
+
+  - title: Pohled
+    path: pohled
+    icon: mdi:view-dashboard
+    type: sections
+    max_columns: 4
+    sections:
+
+      # =====================================================================
+      # 1. Režim TČ – toolbar přes celou šířku view
+      # =====================================================================
+      - type: grid
+        column_span: 4
+        cards:
+          # --- Heading 2 řádky: literal block scalar (zachovává newlines) ---
+          - type: markdown
+            content: |
+              #### 🎲 Režim TČ & 🔧 Stav
+
+              {% set m = states('sensor.acond_30014_hp_mode') %}
+              {% set icon = (
+                '🔴' if m == 'Vypnuto'
+                else ('🟢' if m == 'Automatický'
+                else ('🟠' if m == 'Pouze TČ'
+                else ('🟡' if m == 'Pouze bivalence'
+                else ('🔵' if m == 'Chlazení'
+                else '⚪'))))) %}
+              ## {{ icon }} **{{ m | upper }}**
+
+          # --- Mode toolbar: 5× button karty s velkými ikonami ---
+          - type: horizontal-stack
+            cards:
+              - type: button
+                entity: switch.acond_40006_tc_set_bit_3
+                name: VYP
+                icon: mdi:power-standby
+                icon_height: 60px
+                show_state: false
+                show_name: true
+                show_icon: true
+                tap_action:
+                  action: perform-action
+                  perform_action: switch.turn_on
+                  target:
+                    entity_id: switch.acond_40006_tc_set_bit_3
+                  confirmation:
+                    text: "Vypnout TČ? Topný systém přestane pracovat."
+
+              - type: button
+                entity: switch.acond_40006_tc_set_bit_0
+                name: AUT
+                icon: mdi:auto-mode
+                icon_height: 60px
+                show_state: false
+                show_name: true
+                show_icon: true
+                tap_action:
+                  action: perform-action
+                  perform_action: switch.turn_on
+                  target:
+                    entity_id: switch.acond_40006_tc_set_bit_0
+                  confirmation:
+                    text: "Přepnout na automatický režim?"
+
+              - type: button
+                entity: switch.acond_40006_tc_set_bit_1
+                name: TČ
+                icon: mdi:heat-pump
+                icon_height: 60px
+                show_state: false
+                show_name: true
+                show_icon: true
+                tap_action:
+                  action: perform-action
+                  perform_action: switch.turn_on
+                  target:
+                    entity_id: switch.acond_40006_tc_set_bit_1
+                  confirmation:
+                    text: "Přepnout na režim Pouze TČ (bez bivalence)?"
+
+              - type: button
+                entity: switch.acond_40006_tc_set_bit_2
+                name: BIV
+                icon: mdi:radiator
+                icon_height: 60px
+                show_state: false
+                show_name: true
+                show_icon: true
+                tap_action:
+                  action: perform-action
+                  perform_action: switch.turn_on
+                  target:
+                    entity_id: switch.acond_40006_tc_set_bit_2
+                  confirmation:
+                    text: "Přepnout na režim Pouze bivalence (jen elektrokotel)?"
+
+              - type: button
+                entity: switch.acond_40006_tc_set_bit_4
+                name: CHL
+                icon: mdi:snowflake
+                icon_height: 60px
+                show_state: false
+                show_name: true
+                show_icon: true
+                tap_action:
+                  action: perform-action
+                  perform_action: switch.turn_on
+                  target:
+                    entity_id: switch.acond_40006_tc_set_bit_4
+                  confirmation:
+                    text: "Přepnout na režim chlazení?"
+
+      # =====================================================================
+      # 2. Stav komponent – 8 binary sensorů
+      # =====================================================================
+      - type: grid
+        cards:
+          - type: heading
+            heading: 🔧 Stav komponent
+
+          - type: glance
+            show_state: true
+            state_color: true
+            columns: 4
+            entities:
+              - entity: binary_sensor.acond_30045_hp_comp_bit_0
+                name: Kompresor
+                icon: mdi:hvac
+              - entity: binary_sensor.acond_30045_hp_comp_bit_1
+                name: Ventilátor
+                icon: mdi:fan
+              - entity: binary_sensor.acond_30045_hp_comp_bit_2
+                name: Prim. čerp.
+                icon: mdi:pump
+              - entity: binary_sensor.acond_30007_tc_status_bit_4
+                name: Sek. čerp. 1
+                icon: mdi:pump
+              - entity: binary_sensor.acond_30007_tc_status_bit_5
+                name: Sek. čerp. 2
+                icon: mdi:pump
+              - entity: binary_sensor.acond_30007_tc_status_bit_8
+                name: Odmrazování
+                icon: mdi:snowflake-melt
+              - entity: binary_sensor.acond_30007_tc_status_bit_3
+                name: Ohřev TUV
+                icon: mdi:water-boiler
+              - entity: binary_sensor.acond_30007_tc_status_bit_10
+                name: Letní provoz
+                icon: mdi:weather-sunny
+
+      # =====================================================================
+      # 3. Aktuálně – Příkon / Výkon / COP / Otáčky + slider Max. výkon
+      # =====================================================================
+      - type: grid
+        cards:
+          - type: heading
+            heading: ⚡ Aktuálně
+
+          - type: glance
+            columns: 4
+            entities:
+              - entity: sensor.acond_30027_aep
+                name: Příkon
+              - entity: sensor.acond_30028_ahp
+                name: Výkon
+              - entity: sensor.acond_30029_cop
+                name: COP
+              - entity: sensor.acond_30024_comp_rpm_actual
+                # name vynecháno – dynamický friendly_name z entity
+
+          - type: tile
+            entity: number.acond_40014_comp_capacity_max_set
+            features:
+              - type: numeric-input
+                style: slider
+
+      # =====================================================================
+      # 4. Teploty – glance přehled + 2×2 grid jediných tile karet
+      # =====================================================================
+      - type: grid
+        cards:
+          - type: heading
+            heading: 🌡️ Teploty
+
+          # --- Rychlý pohled: 6 teplot v 1 řádku ---
+          - type: glance
+            show_state: true
+            show_name: true
+            state_color: false
+            columns: 6
+            entities:
+              - entity: sensor.acond_30002_t_act_indoor1
+                name: Okruh 1
+                icon: mdi:home-thermometer-outline
+              - entity: sensor.acond_30004_t_act_indoor2
+                name: Okruh 2
+                icon: mdi:home-thermometer-outline
+              - entity: sensor.acond_30006_t_act_tuv
+                name: TUV
+                icon: mdi:water-thermometer-outline
+              - entity: sensor.acond_30009_t_act_water_back
+                name: Zpátečka
+                icon: mdi:thermometer-low
+              - entity: sensor.acond_30018_t_act_water_outlet
+                name: Topná voda
+                icon: mdi:thermometer-high
+              - entity: sensor.acond_30010_t_act_air
+                name: Venkovní
+                icon: mdi:weather-partly-cloudy
+
+          # --- 2×2 grid jediných tile karet (vše v jedné kartě per okruh) ---
+          - type: grid
+            columns: 2
+            square: false
+            cards:
+              - type: tile
+                entity: number.acond_40001_t_set_indoor1
+                name: "Okruh 1 – zadání"
+                icon: mdi:home-thermometer
+                features:
+                  - type: numeric-input
+                    style: buttons
+
+              - type: tile
+                entity: number.acond_40003_t_set_indoor2
+                name: "Okruh 2 – zadání"
+                icon: mdi:home-thermometer
+                features:
+                  - type: numeric-input
+                    style: buttons
+
+              - type: tile
+                entity: number.acond_40005_t_set_tuv
+                name: "TUV – zadání"
+                icon: mdi:water-thermometer
+                features:
+                  - type: numeric-input
+                    style: buttons
+
+              - type: tile
+                entity: number.acond_40008_t_set_water_back
+                name: "Zpátečka – zadání"
+                icon: mdi:thermometer-low
+                features:
+                  - type: numeric-input
+                    style: buttons
+
+      # =====================================================================
+      # 5. Graf teplot 24h – přes celou šířku view
+      # =====================================================================
+      - type: grid
+        column_span: 4
+        cards:
+          - type: heading
+            heading: 📈 Teploty (24 h)
+
+          - type: history-graph
+            hours_to_show: 24
+            refresh_interval: 60
+            entities:
+              - sensor.acond_30002_t_act_indoor1
+              - sensor.acond_30004_t_act_indoor2
+              - sensor.acond_30006_t_act_tuv
+              - sensor.acond_30009_t_act_water_back
+              - sensor.acond_30018_t_act_water_outlet
+              - sensor.acond_30010_t_act_air
+
+  - title: Přehled
+    path: prehled
+    icon: mdi:home-thermometer
+
+    cards:
+      - type: glance
+        title: Stav tepelného čerpadla
+        columns: 3
+        entities:
+          - entity: binary_sensor.acond_30007_tc_status_bit_0
+            name: Zapnuto
+          - entity: binary_sensor.acond_30007_tc_status_bit_1
+            name: V provozu
+          - entity: binary_sensor.acond_30007_tc_status_bit_2
+            name: Porucha
+          - entity: sensor.acond_30014_hp_mode
+            name: Režim
+          - entity: sensor.acond_30015_regulation_type
+            name: Regulace
+          - entity: sensor.acond_30021_err_number
+            name: Poslední chyba
+
+      - type: entities
+        title: Topné okruhy a TUV
+        entities:
+          - type: section
+            label: Okruh 1
+          - entity: sensor.acond_30002_t_act_indoor1
+            name: Aktuální teplota
+          - entity: sensor.acond_30001_t_set_indoor1
+            name: Požadovaná teplota
+          - type: section
+            label: Okruh 2
+          - entity: sensor.acond_30004_t_act_indoor2
+            name: Aktuální teplota
+          - entity: sensor.acond_30003_t_set_indoor2
+            name: Požadovaná teplota
+          - type: section
+            label: TUV
+          - entity: sensor.acond_30006_t_act_tuv
+            name: Aktuální teplota
+          - entity: sensor.acond_30005_t_set_tuv
+            name: Požadovaná teplota
+
+      - type: entities
+        title: Teploty vody a venkovní
+        entities:
+          - entity: sensor.acond_30010_t_act_air
+            name: Venkovní teplota
+          - entity: sensor.acond_30018_t_act_water_outlet
+            name: Topná voda – výstup
+          - entity: sensor.acond_30009_t_act_water_back
+            name: Topná voda – zpátečka
+          - entity: sensor.acond_30008_t_set_water_back
+            name: Požadovaná zpátečka
+
+      # --- Solár (podmíněné) ---
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.acond_30011_t_act_solar
+            state_not: unavailable
+          - condition: state
+            entity: sensor.acond_30011_t_act_solar
+            state_not: unknown
+        card:
+          type: entities
+          title: Solární systém
+          entities:
+            - entity: sensor.acond_30011_t_act_solar
+              name: Teplota panelu
+            - entity: binary_sensor.acond_30007_tc_status_bit_6
+              name: Cirkulace
+
+      # --- Bazén (podmíněné) ---
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.acond_30012_t_act_pool
+            state_not: unavailable
+          - condition: state
+            entity: sensor.acond_30012_t_act_pool
+            state_not: unknown
+        card:
+          type: entities
+          title: Bazén
+          entities:
+            - entity: sensor.acond_30012_t_act_pool
+              name: Teplota bazénu
+            - entity: sensor.acond_30013_t_set_pool
+              name: Požadovaná teplota
+            - entity: binary_sensor.acond_30007_tc_status_bit_7
+              name: Cirkulace
+
+      # --- Solanka (podmíněné – jen pro solankové TČ) ---
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.acond_30016_brine_temp
+            state_not: unavailable
+          - condition: state
+            entity: sensor.acond_30016_brine_temp
+            state_not: unknown
+        card:
+          type: entities
+          title: Primární okruh (solanka)
+          entities:
+            - entity: sensor.acond_30016_brine_temp
+              name: Teplota solanky
+            - entity: binary_sensor.acond_30007_tc_status_bit_11
+              name: Čerpadlo
+
+      - type: glance
+        title: Aktuální výkon
+        columns: 3
+        entities:
+          - entity: sensor.acond_30027_aep
+            name: Elektrický příkon
+          - entity: sensor.acond_30028_ahp
+            name: Tepelný výkon
+          - entity: sensor.acond_30029_cop
+            name: COP
+
+  # =========================================================================
+  # 2. OVLÁDÁNÍ – režim, setpointy, nebezpečné akce
+  # =========================================================================
+  - title: Ovládání
+    path: ovladani
+    icon: mdi:tune
+
+    cards:
+      - type: entities
+        title: Režim TČ
+        state_color: true
+        entities:
+          - entity: switch.acond_40006_tc_set_bit_0
+            name: Automatický režim
+            tap_action:
+              action: toggle
+              confirmation:
+                text: Přepnout do automatického režimu?
+          - entity: switch.acond_40006_tc_set_bit_1
+            name: Pouze TČ
+            tap_action:
+              action: toggle
+              confirmation:
+                text: Přepnout do režimu „Pouze TČ"?
+          - entity: switch.acond_40006_tc_set_bit_2
+            name: Pouze bivalence (aux. topení)
+            tap_action:
+              action: toggle
+              confirmation:
+                text: Přepnout do bivalentního režimu (pouze aux. topení)?
+          - entity: switch.acond_40006_tc_set_bit_4
+            name: Chlazení
+            tap_action:
+              action: toggle
+              confirmation:
+                text: Přepnout do režimu chlazení?
+          - entity: switch.acond_40006_tc_set_bit_3
+            name: Vypnuto
+            tap_action:
+              action: toggle
+              confirmation:
+                text: "POZOR: Vypnutí odpojí tepelné čerpadlo. Pokračovat?"
+          - entity: select.acond_40007_sel_regulation_type
+            name: Typ regulace
+
+      - type: entities
+        title: Požadované teploty
+        entities:
+          - entity: number.acond_40001_t_set_indoor1
+            name: Okruh 1
+          - entity: number.acond_40003_t_set_indoor2
+            name: Okruh 2
+          - entity: number.acond_40005_t_set_tuv
+            name: TUV
+          - entity: number.acond_40008_t_set_water_back
+            name: Zpátečka (manuální režim)
+
+      - type: entities
+        title: Teplota externích čidel
+        entities:
+          - type: section
+            label: Hodnota externího čidla NAHRAZUJE interní čidlo TČ.
+                   Pro vypnutí externího čidla použij tlačítko "Přepnout na interní čidlo".
+          - entity: number.acond_40002_t_corr_indoor1
+            name: Teplota místnosti okruh 1
+          - entity: button.acond_40002_reset_t_corr_indoor1
+            name: Přepnout na interní čidlo okruh 1
+            icon: mdi:thermometer-off
+          - entity: number.acond_40004_t_corr_indoor2
+            name: Teplota místnosti okruh 2
+          - entity: button.acond_40004_reset_t_corr_indoor2
+            name: Přepnout na interní čidlo okruh 2
+            icon: mdi:thermometer-off
+          - entity: number.acond_40009_t_corr_air
+            name: Venkovní teplota
+          - entity: button.acond_40009_reset_t_corr_air
+            name: Přepnout na interní venkovní čidlo
+            icon: mdi:thermometer-off
+          - entity: number.acond_40010_t_corr_solar
+            name: Solární teplota
+          - entity: button.acond_40010_reset_t_corr_solar
+            name: Přepnout na interní solární čidlo
+            icon: mdi:thermometer-off
+          - entity: number.acond_40011_t_corr_pool
+            name: Teplota bazénu
+          - entity: button.acond_40011_reset_t_corr_pool
+            name: Přepnout na interní bazénové čidlo
+            icon: mdi:thermometer-off
+
+      - type: entities
+        title: Tichý provoz
+        entities:
+          - entity: switch.acond_40018_silent_mode_set
+            name: Tichý provoz – ovládání
+          - entity: number.acond_40019_silent_mode_start_set
+            name: Začátek – nastavení (min od 00:00)
+          - entity: number.acond_40020_silent_mode_stop_set
+            name: Konec – nastavení (min od 00:00)
+          - type: section
+            label: Aktuální stav v TČ
+          - entity: sensor.acond_30032_silent_mode
+            name: Tichý provoz aktivní
+          - entity: sensor.acond_30033_silent_mode_start
+            name: Začátek (min od 00:00)
+          - entity: sensor.acond_30034_silent_mode_stop
+            name: Konec (min od 00:00)
+
+      - type: entities
+        title: Kompresor a oběhové čerpadlo
+        entities:
+          - entity: number.acond_40014_comp_capacity_max_set
+            name: Max. výkon/otáčky kompresoru
+          - entity: switch.acond_40016_manual_pwm_set
+            name: Manuální řízení oběh. čerpadla – ovládání
+          - entity: sensor.acond_30026_manual_pwm
+            name: Manuální řízení – aktuální stav v TČ
+          - entity: number.acond_40015_pwm_set
+            name: Rychlost oběh. čerpadla
+          - entity: switch.acond_40017_manual_eh_set
+            name: Povolení bivalence
+
+      # --- Solární ovládání (podmíněné) ---
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.acond_30011_t_act_solar
+            state_not: unavailable
+          - condition: state
+            entity: sensor.acond_30011_t_act_solar
+            state_not: unknown
+        card:
+          type: entities
+          title: Solár
+          entities:
+            - entity: switch.acond_40006_tc_set_bit_6
+              name: Solár zapnuto
+              tap_action:
+                action: toggle
+                confirmation:
+                  text: Přepnout solární okruh?
+
+      # --- Bazénové ovládání (podmíněné) ---
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.acond_30012_t_act_pool
+            state_not: unavailable
+          - condition: state
+            entity: sensor.acond_30012_t_act_pool
+            state_not: unknown
+        card:
+          type: entities
+          title: Bazén
+          entities:
+            - entity: switch.acond_40006_tc_set_bit_7
+              name: Bazén zapnuto
+              tap_action:
+                action: toggle
+                confirmation:
+                  text: Přepnout bazénový okruh?
+            - entity: number.acond_40012_t_set_pool
+              name: Požadovaná teplota bazénu
+
+      - type: entities
+        title: Chlazení
+        entities:
+          - entity: number.acond_40013_t_set_water_outlet
+            name: Požadovaná teplota výstupu
+          - entity: sensor.acond_30019_t_set_water_outlet
+            name: Aktuální nastavení v TČ
+
+      # --- Nebezpečné akce – všechny s potvrzením ---
+      - type: entities
+        title: ⚠️ Servisní akce
+        entities:
+          - entity: button.acond_40006_tc_set_bit_5
+            name: Potvrzení poruchy
+            tap_action:
+              action: call-service
+              service: button.press
+              target:
+                entity_id: button.acond_40006_tc_set_bit_5
+              confirmation:
+                text: Opravdu potvrdit aktuální poruchu? TČ se pokusí o restart.
+          - entity: button.acond_40006_tc_set_bit_8
+            name: Přepnout léto / zima
+            tap_action:
+              action: call-service
+              service: button.press
+              target:
+                entity_id: button.acond_40006_tc_set_bit_8
+              confirmation:
+                text: Přepnout provozní režim léto/zima?
+          - entity: button.acond_40021_reset_plc_set
+            name: Reset PLC
+            tap_action:
+              action: call-service
+              service: button.press
+              target:
+                entity_id: button.acond_40021_reset_plc_set
+              confirmation:
+                text: "POZOR: Reset PLC restartuje řídicí jednotku. Pokračovat jen pokud víte, co děláte!"
+
+  # =========================================================================
+  # 3. ENERGIE – výkon, COP, denní a celková spotřeba
+  # =========================================================================
+  - title: Energie
+    path: energie
+    icon: mdi:lightning-bolt
+
+    cards:
+      - type: glance
+        title: Aktuální výkon a účinnost
+        columns: 2
+        entities:
+          - entity: sensor.acond_30027_aep
+            name: El. příkon
+          - entity: sensor.acond_30028_ahp
+            name: Tepelný výkon
+          - entity: sensor.acond_30029_cop
+            name: COP
+          - entity: sensor.acond_30041_scop
+            name: SCOP (sezónní)
+
+      - type: entities
+        title: Topení – dnes
+        entities:
+          - entity: sensor.acond_30039_ted
+            name: Tepelná energie
+          - entity: sensor.acond_30040_eed
+            name: Elektrická energie
+
+      - type: entities
+        title: Topení – celkem
+        entities:
+          - entity: sensor.acond_30035_tes
+            name: Tepelná energie
+          - entity: sensor.acond_30037_ees
+            name: Elektrická energie
+
+      # --- Chlazení (podmíněné) ---
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.acond_30069_cooling_energy
+            state_not: unavailable
+          - condition: state
+            entity: sensor.acond_30069_cooling_energy
+            state_not: unknown
+        card:
+          type: entities
+          title: Chlazení – energie
+          entities:
+            - type: section
+              label: Dnes
+            - entity: sensor.acond_30073_ced
+              name: Chladicí energie
+            - entity: sensor.acond_30074_eecd
+              name: Elektrická energie chlazení
+            - type: section
+              label: Celkem
+            - entity: sensor.acond_30069_cooling_energy
+              name: Chladicí energie
+            - entity: sensor.acond_30071_ece
+              name: Elektrická energie chlazení
+
+      - type: history-graph
+        title: Výkon (24 h)
+        hours_to_show: 24
+        entities:
+          - sensor.acond_30027_aep
+          - sensor.acond_30028_ahp
+
+      - type: history-graph
+        title: COP (24 h)
+        hours_to_show: 24
+        entities:
+          - sensor.acond_30029_cop
+
+  # =========================================================================
+  # 5. GRAFY – dlouhodobé statistiky (built-in statistics-graph + history-graph)
+  # =========================================================================
+  - title: Grafy
+    path: grafy
+    icon: mdi:chart-line
+
+    cards:
+      - type: markdown
+        content: >
+          **7denní statistiky** používají Long-Term Statistics z HA recorderu
+          (hodinové průměry). **24h grafy** ukazují přímá data.
+
+      # --- 7 dní: teploty (mean) ---
+      - type: statistics-graph
+        title: Teploty – 7 dní
+        chart_type: line
+        period: hour
+        days_to_show: 7
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.acond_30002_t_act_indoor1
+            name: Okruh 1
+          - entity: sensor.acond_30006_t_act_tuv
+            name: TUV
+          - entity: sensor.acond_30010_t_act_air
+            name: Venkovní
+          - entity: sensor.acond_30018_t_act_water_outlet
+            name: Topná voda – výstup
+          - entity: sensor.acond_30009_t_act_water_back
+            name: Topná voda – zpátečka
+
+      # --- 7 dní: denní spotřeba energie (sum/state — co recorder uchovává) ---
+      - type: statistics-graph
+        title: Energie – 7 dní (denní spotřeba)
+        chart_type: bar
+        period: day
+        days_to_show: 7
+        stat_types:
+          - state
+        entities:
+          - entity: sensor.acond_30039_ted
+            name: Tepelná energie dnes (kWh)
+          - entity: sensor.acond_30040_eed
+            name: Elektrická energie dnes (kWh)
+
+      # --- 7 dní: COP / SCOP ---
+      - type: statistics-graph
+        title: COP / SCOP – 7 dní
+        chart_type: line
+        period: hour
+        days_to_show: 7
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.acond_30029_cop
+            name: Topný faktor COP
+          - entity: sensor.acond_30041_scop
+            name: Sezónní SCOP
+
+      # --- 24 h: tepelný výkon vs. elektrický příkon ---
+      - type: history-graph
+        title: Výkon (24 h)
+        hours_to_show: 24
+        refresh_interval: 60
+        entities:
+          - entity: sensor.acond_30028_ahp
+            name: Tepelný výkon
+          - entity: sensor.acond_30027_aep
+            name: Elektrický příkon
+
+      # --- 24 h: výstup vs. zpátečka (Δt diagnostika) ---
+      - type: history-graph
+        title: Topná voda – výstup vs. zpátečka (24 h)
+        hours_to_show: 24
+        refresh_interval: 60
+        entities:
+          - entity: sensor.acond_30018_t_act_water_outlet
+            name: Výstup
+          - entity: sensor.acond_30009_t_act_water_back
+            name: Zpátečka
+
+      # --- 7 dní: cyklování kompresoru ---
+      - type: statistics-graph
+        title: Cyklování kompresoru – 7 dní (mean rpm/h)
+        chart_type: line
+        period: hour
+        days_to_show: 7
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.acond_30024_comp_rpm_actual
+            name: Otáčky kompresoru
+
+  # =========================================================================
+  # 4. DIAGNOSTIKA – chyby, komponenty, chladivo, provozní hodiny
+  # =========================================================================
+  - title: Diagnostika
+    path: diagnostika
+    icon: mdi:wrench
+
+    cards:
+      # ---------- AI kontext export – nahoře, ať je vidět ----------
+      - type: entities
+        title: 🤖 Export AI kontextu pro Claude / ChatGPT
+        show_header_toggle: false
+        entities:
+          - type: section
+            label: Vytvoří markdown soubor s diagnostikou a nabídne ho ke stažení
+          - entity: button.acond_ai_context_acond
+            name: Jen acond entity (rychlé, malý soubor)
+            icon: mdi:robot-outline
+            tap_action:
+              action: call-service
+              service: button.press
+              target:
+                entity_id: button.acond_ai_context_acond
+          - entity: button.acond_ai_context_full
+            name: Celé HA (velký soubor – pozor na secrets!)
+            icon: mdi:robot
+            tap_action:
+              action: call-service
+              service: button.press
+              target:
+                entity_id: button.acond_ai_context_full
+              confirmation:
+                text: >-
+                  Export celé HA konfigurace může obsahovat citlivé údaje
+                  z jiných integrací (IP adresy, e-maily, tokeny v webhoocích).
+                  Automatická redakce zachytí běžné secrets, ale není 100%.
+                  Před odesláním do AI si soubor projdi. Pokračovat?
+          - type: section
+            label: Po stisknutí najdeš download link v notifikacích (zvonek vpravo nahoře)
+
+      - type: markdown
+        content: |
+          ## Co je AI kontext?
+
+          Dva exporty pro diagnostiku integrace ve spolupráci s AI asistentem:
+
+          - **Jen acond entity** – jen entity, automatizace, zařízení a logy
+            týkající se integrace Acond. Bezpečnější varianta pro sdílení.
+          - **Celé HA** – všechny integrace, pokud problém spojený s acondem
+            může souviset s něčím jiným v HA.
+
+          Soubor se ukládá do `/config/acond_ai_context/` jako markdown
+          (`acond_only_YYYYMMDD_HHMMSS.md` nebo `full_YYYYMMDD_HHMMSS.md`)
+          a po vytvoření přijde **persistent notification s klikacím download
+          linkem**.
+
+          Před odesláním do AI si soubor vždy projdi – automatická redakce
+          nahrazuje hodnoty u klíčů typu `password`, `token`, `secret`,
+          `webhook` apod., ale **nezachytí všechno** (IP, e-maily, GPS, jména).
+
+
+      - type: entities
+        title: Chybové kódy
+        entities:
+          - entity: sensor.acond_30021_err_number
+            name: Stav TČ
+          - entity: sensor.acond_30023_err_number_driver
+            name: Stav driveru
+
+      - type: glance
+        title: Stav komponent
+        show_state: true
+        state_color: true
+        columns: 4
+        entities:
+          - entity: binary_sensor.acond_30045_hp_comp_bit_0
+            name: Kompresor
+          - entity: binary_sensor.acond_30045_hp_comp_bit_1
+            name: Ventilátor
+          - entity: binary_sensor.acond_30045_hp_comp_bit_2
+            name: Prim. čerp.
+          - entity: binary_sensor.acond_30045_hp_comp_bit_3
+            name: Rev. ventil
+
+      - type: glance
+        title: Stavové bity TČ
+        show_state: true
+        state_color: true
+        columns: 4
+        entities:
+          - entity: binary_sensor.acond_30007_tc_status_bit_3
+            name: Ohřev TUV
+          - entity: binary_sensor.acond_30007_tc_status_bit_4
+            name: Čerp. okruh 1
+          - entity: binary_sensor.acond_30007_tc_status_bit_5
+            name: Čerp. okruh 2
+          - entity: binary_sensor.acond_30007_tc_status_bit_8
+            name: Odmrazování
+          - entity: binary_sensor.acond_30007_tc_status_bit_9
+            name: Bivalence
+          - entity: binary_sensor.acond_30007_tc_status_bit_10
+            name: Letní provoz
+          - entity: binary_sensor.acond_30007_tc_status_bit_12
+            name: Chlazení
+
+      - type: entities
+        title: Kompresor a chladivo
+        entities:
+          - entity: sensor.acond_30020_comp_rpm_max
+            name: Max. otáčky / výkon
+          - entity: sensor.acond_30024_comp_rpm_actual
+            name: Aktuální otáčky / výkon
+          - entity: sensor.acond_30075_compressor_starts
+            name: Počet startů
+          - entity: sensor.acond_30042_t_act_hp
+            name: Kondenzační teplota
+          - entity: sensor.acond_30043_t_act_lp
+            name: Vypařovací teplota
+          - entity: sensor.acond_30048_t_act_suction
+            name: Sací teplota
+          - entity: sensor.acond_30049_t_act_discharge
+            name: Výtlačná teplota
+          - entity: sensor.acond_30026_manual_pwm
+            name: Manuální režim čerpadla
+          - entity: sensor.acond_30047_eev_steps
+            name: Poloha EEV
+          - entity: sensor.acond_30046_fan_speed
+            name: Rychlost ventilátoru
+          - entity: sensor.acond_30025_actual_pwm
+            name: Rychlost oběh. čerpadla
+
+      - type: entities
+        title: Bivalence
+        entities:
+          - entity: sensor.acond_30030_t02_eh
+            name: Teplota E-heateru
+          - entity: sensor.acond_30031_manual_eh
+            name: Povolení bivalence – stav v TČ
+
+      - type: entities
+        title: Provozní hodiny
+        entities:
+          - entity: sensor.acond_30050_compressor_hours
+            name: Kompresor – hodiny
+          - entity: sensor.acond_30052_compressor_min
+            name: Kompresor – minuty
+          - entity: sensor.acond_30053_fan_hours
+            name: Ventilátor – hodiny
+          - entity: sensor.acond_30055_fan_min
+            name: Ventilátor – minuty
+          - entity: sensor.acond_30056_rv_hours
+            name: Reverzní ventil – hodiny
+          - entity: sensor.acond_30058_rv_min
+            name: Reverzní ventil – minuty
+          - entity: sensor.acond_30059_pump_hours
+            name: Oběhové čerpadlo – hodiny
+          - entity: sensor.acond_30061_pump_min
+            name: Oběhové čerpadlo – minuty
+          - entity: sensor.acond_30062_bivalence1_hours
+            name: Bivalence 1 – hodiny
+          - entity: sensor.acond_30064_bivalence1_min
+            name: Bivalence 1 – minuty
+
+      # --- Bivalence 2 (podmíněné – ne každé TČ má druhou bivalenci) ---
+      - type: conditional
+        conditions:
+          - condition: numeric_state
+            entity: sensor.acond_30065_bivalence2_hours
+            above: -1
+        card:
+          type: entities
+          title: Bivalence 2
+          entities:
+            - entity: sensor.acond_30065_bivalence2_hours
+              name: Hodiny
+            - entity: sensor.acond_30067_bivalence2_min
+              name: Minuty
+
+      - type: entities
+        title: Surové stavové registry (pokročilé)
+        entities:
+          - entity: sensor.acond_30007_tc_status
+            name: TC_status (raw word)
+          - entity: sensor.acond_30045_hp_component_status
+            name: HP_component_status (raw word)
+
+      - type: entities
+        title: Další
+        entities:
+          - entity: sensor.acond_30017_heartbeat
+            name: Heartbeat (čítač komunikace)
+          - entity: sensor.acond_30044_thermal_power
+            name: Třída tepelného výkonu
+          - entity: sensor.acond_30068_reset_plc
+            name: Stav resetu PLC
+
+
+  # =========================================================================
+  # 6. APLIKACE ACOND – odkaz na webový panel TČ (TecoRoute, nové okno)
+  # =========================================================================
+  - title: Aplikace Acond
+    path: aplikace-acond
+    icon: mdi:web
+
+    cards:
+      - type: markdown
+        content: |
+          ## 🌐 Aplikace Acond
+
+          Webové rozhraní TČ pro nastavení toho, co Modbus neumí –
+          rozvrh blokace TUV, ekvitermní křivka, podrobné parametry.
+
+          Klikni na tlačítko níže – panel se otevře v novém okně
+          prohlížeče. Funguje **odkudkoli** (i mimo domov), na desktopu
+          i na mobilu.
+
+          Pro přihlášení použij **login a heslo z Acondu**. Pokud máš
+          v TecoRoute portálu vygenerován **trvalý autologin odkaz**,
+          při dalším otevření tě cloud rovnou přesměruje do panelu.
+
+      - type: button
+        name: Otevřít panel TČ v novém okně
+        icon: mdi:open-in-new
+        icon_height: 48px
+        tap_action:
+          action: url
+          url_path: https://route3.tecomat.com/TR_LOGIN.XML
+        show_state: false
+
+  # =========================================================================
+  # 7. NÁPOVĚDA – AI export, přehled entit a vzory pro automatizace
+  # =========================================================================
+  - title: Nápověda
+    path: napoveda
+    icon: mdi:help-circle
+
+    cards:
+      - type: markdown
+        title: O integraci
+        content: |
+          ## Acond Heat Pump – přehled entit
+
+          Integrace vytváří entity ve formátu:
+          ```
+          sensor.acond_{registr}_{key}
+          binary_sensor.acond_{registr}_{key}
+          number.acond_{registr}_{key}
+          switch.acond_{registr}_{key}
+          select.acond_{registr}_{key}
+          button.acond_{registr}_{key}
+          ```
+          Číslo registru je součástí `entity_id` – snadno tak dohledáš zdroj hodnoty v Modbus protokolu.
+
+      - type: markdown
+        title: Senzory – čtení (30xxx)
+        content: |
+          | Entity ID | Název |
+          |-----------|-------|
+          | `sensor.acond_30001_t_set_indoor1` | Požadovaná teplota okruh 1 |
+          | `sensor.acond_30002_t_act_indoor1` | Teplota okruh 1 |
+          | `sensor.acond_30003_t_set_indoor2` | Požadovaná teplota okruh 2 |
+          | `sensor.acond_30004_t_act_indoor2` | Teplota okruh 2 |
+          | `sensor.acond_30005_t_set_tuv` | Požadovaná teplota TUV |
+          | `sensor.acond_30006_t_act_tuv` | Teplota TUV |
+          | `sensor.acond_30007_tc_status` | Stav TČ (raw word) |
+          | `sensor.acond_30008_t_set_water_back` | Požadovaná teplota zpátečky |
+          | `sensor.acond_30009_t_act_water_back` | Teplota zpátečky |
+          | `sensor.acond_30010_t_act_air` | Venkovní teplota |
+          | `sensor.acond_30011_t_act_solar` | Teplota solárního panelu |
+          | `sensor.acond_30012_t_act_pool` | Teplota bazénu |
+          | `sensor.acond_30013_t_set_pool` | Požadovaná teplota bazénu |
+          | `sensor.acond_30014_hp_mode` | Režim TČ |
+          | `sensor.acond_30015_regulation_type` | Typ regulace |
+          | `sensor.acond_30016_brine_temp` | Teplota solanky |
+          | `sensor.acond_30017_heartbeat` | Čítač komunikace Modbus |
+          | `sensor.acond_30018_t_act_water_outlet` | Teplota topné vody |
+          | `sensor.acond_30019_t_set_water_outlet` | Požadovaná teplota výstupu chlazení |
+          | `sensor.acond_30020_comp_rpm_max` | Max. otáčky / výkon kompresoru |
+          | `sensor.acond_30021_err_number` | Stav TČ – popis chyby |
+          | `sensor.acond_30023_err_number_driver` | Stav driveru – popis chyby |
+          | `sensor.acond_30024_comp_rpm_actual` | Otáčky/výkon kompresoru |
+          | `sensor.acond_30025_actual_pwm` | Rychlost oběhového čerpadla |
+          | `sensor.acond_30026_manual_pwm` | Manuální režim prim. čerpadla |
+          | `sensor.acond_30027_aep` | Elektrický příkon |
+          | `sensor.acond_30028_ahp` | Tepelný výkon |
+          | `sensor.acond_30029_cop` | Topný faktor COP |
+          | `sensor.acond_30030_t02_eh` | Teplota E-heateru |
+          | `sensor.acond_30031_manual_eh` | Povolení režimu Bivalence |
+          | `sensor.acond_30032_silent_mode` | Tichý provoz |
+          | `sensor.acond_30033_silent_mode_start` | Tichý provoz – začátek |
+          | `sensor.acond_30034_silent_mode_stop` | Tichý provoz – konec |
+          | `sensor.acond_30035_tes` | Tepelná energie celkem |
+          | `sensor.acond_30037_ees` | Elektrická energie celkem |
+          | `sensor.acond_30039_ted` | Tepelná energie dnes |
+          | `sensor.acond_30040_eed` | Elektrická energie dnes |
+          | `sensor.acond_30041_scop` | Sezónní topný faktor SCOP |
+          | `sensor.acond_30042_t_act_hp` | Kondenzační teplota |
+          | `sensor.acond_30043_t_act_lp` | Vypařovací teplota |
+          | `sensor.acond_30044_thermal_power` | Třída tepelného výkonu |
+          | `sensor.acond_30045_hp_component_status` | Stav komponent (raw word) |
+          | `sensor.acond_30046_fan_speed` | Rychlost ventilátoru |
+          | `sensor.acond_30047_eev_steps` | Poloha expanzního ventilu |
+          | `sensor.acond_30048_t_act_suction` | Sací teplota |
+          | `sensor.acond_30049_t_act_discharge` | Výtlačná teplota |
+          | `sensor.acond_30050_compressor_hours` | Hodiny kompresoru |
+          | `sensor.acond_30052_compressor_min` | Minuty kompresoru |
+          | `sensor.acond_30053_fan_hours` | Hodiny ventilátoru |
+          | `sensor.acond_30055_fan_min` | Minuty ventilátoru |
+          | `sensor.acond_30056_rv_hours` | Hodiny reverzního ventilu |
+          | `sensor.acond_30058_rv_min` | Minuty reverzního ventilu |
+          | `sensor.acond_30059_pump_hours` | Hodiny oběhového čerpadla |
+          | `sensor.acond_30061_pump_min` | Minuty oběhového čerpadla |
+          | `sensor.acond_30062_bivalence1_hours` | Hodiny bivalence 1 |
+          | `sensor.acond_30064_bivalence1_min` | Minuty bivalence 1 |
+          | `sensor.acond_30065_bivalence2_hours` | Hodiny bivalence 2 |
+          | `sensor.acond_30067_bivalence2_min` | Minuty bivalence 2 |
+          | `sensor.acond_30068_reset_plc` | Stav resetu PLC |
+          | `sensor.acond_30069_cooling_energy` | Chladicí energie celkem |
+          | `sensor.acond_30071_ece` | Elektrická energie chlazení celkem |
+          | `sensor.acond_30073_ced` | Chladicí energie dnes |
+          | `sensor.acond_30074_eecd` | Elektrická energie chlazení dnes |
+          | `sensor.acond_30075_compressor_starts` | Počet startů kompresoru |
+
+      - type: markdown
+        title: Binární senzory (30xxx bity)
+        content: |
+          | Entity ID | Název |
+          |-----------|-------|
+          | `binary_sensor.acond_30007_tc_status_bit_0` | TČ zapnuto |
+          | `binary_sensor.acond_30007_tc_status_bit_1` | TČ v provozu |
+          | `binary_sensor.acond_30007_tc_status_bit_2` | Porucha TČ |
+          | `binary_sensor.acond_30007_tc_status_bit_3` | Ohřev TUV |
+          | `binary_sensor.acond_30007_tc_status_bit_4` | Čerpadlo okruh 1 |
+          | `binary_sensor.acond_30007_tc_status_bit_5` | Čerpadlo okruh 2 |
+          | `binary_sensor.acond_30007_tc_status_bit_6` | Solární cirkulace |
+          | `binary_sensor.acond_30007_tc_status_bit_7` | Bazénová cirkulace |
+          | `binary_sensor.acond_30007_tc_status_bit_8` | Odmrazování |
+          | `binary_sensor.acond_30007_tc_status_bit_9` | Bivalence |
+          | `binary_sensor.acond_30007_tc_status_bit_10` | Letní provoz |
+          | `binary_sensor.acond_30007_tc_status_bit_11` | Solankové čerpadlo |
+          | `binary_sensor.acond_30007_tc_status_bit_12` | Chlazení |
+          | `binary_sensor.acond_30045_hp_comp_bit_0` | Kompresor |
+          | `binary_sensor.acond_30045_hp_comp_bit_1` | Ventilátor |
+          | `binary_sensor.acond_30045_hp_comp_bit_2` | Primární čerpadlo |
+          | `binary_sensor.acond_30045_hp_comp_bit_3` | Reverzní ventil |
+
+      - type: markdown
+        title: Ovládání – zápis (40xxx)
+        content: |
+          | Entity ID | Typ | Název |
+          |-----------|-----|-------|
+          | `number.acond_40001_t_set_indoor1` | number | Požadovaná teplota okruh 1 |
+          | `number.acond_40002_t_corr_indoor1` | number | Teplota okruh 1 z ext. senzoru |
+          | `number.acond_40003_t_set_indoor2` | number | Požadovaná teplota okruh 2 |
+          | `number.acond_40004_t_corr_indoor2` | number | Teplota okruh 2 z ext. senzoru |
+          | `number.acond_40005_t_set_tuv` | number | Požadovaná teplota TUV |
+          | `switch.acond_40006_tc_set_bit_0` | switch | Automatický režim |
+          | `switch.acond_40006_tc_set_bit_1` | switch | Režim pouze TČ |
+          | `switch.acond_40006_tc_set_bit_2` | switch | Režim bivalence |
+          | `switch.acond_40006_tc_set_bit_3` | switch | Vypnuto ⚠️ |
+          | `switch.acond_40006_tc_set_bit_4` | switch | Režim chlazení |
+          | `button.acond_40006_tc_set_bit_5` | button | Potvrzení poruchy ⚠️ |
+          | `switch.acond_40006_tc_set_bit_6` | switch | Solár zapnuto |
+          | `switch.acond_40006_tc_set_bit_7` | switch | Bazén zapnuto |
+          | `button.acond_40006_tc_set_bit_8` | button | Přepnout léto/zima |
+          | `select.acond_40007_sel_regulation_type` | select | Typ regulace |
+          | `number.acond_40008_t_set_water_back` | number | Požadovaná teplota zpátečky - Standard |
+          | `number.acond_40009_t_corr_air` | number | Venkovní teplota z ext. čidla |
+          | `number.acond_40010_t_corr_solar` | number | Solární teplota z ext. čidla |
+          | `number.acond_40011_t_corr_pool` | number | Bazénová teplota z ext. čidla |
+          | `number.acond_40012_t_set_pool` | number | Požadovaná teplota bazénu |
+          | `number.acond_40013_t_set_water_outlet` | number | Požadovaná teplota výstupu chlazení |
+          | `number.acond_40014_comp_capacity_max_set` | number | Max. otáčky / výkon kompresoru |
+          | `number.acond_40015_pwm_set` | number | Nast. rychlosti oběh. čerpadla |
+          | `switch.acond_40016_manual_pwm_set` | switch | Povolení řízení ob. čerpadla |
+          | `switch.acond_40017_manual_eh_set` | switch | Povolení bivalence |
+          | `switch.acond_40018_silent_mode_set` | switch | Tichý provoz |
+          | `number.acond_40019_silent_mode_start_set` | number | Tichý provoz – začátek (min od 00:00) |
+          | `number.acond_40020_silent_mode_stop_set` | number | Tichý provoz – konec (min od 00:00) |
+          | `button.acond_40021_reset_plc_set` | button | Reset PLC ⚠️ |
+
+      - type: markdown
+        title: Service tlačítka (mimo Modbus)
+        content: |
+          | Entity ID | Popis |
+          |-----------|-------|
+          | `button.acond_ai_context_acond` | Export AI kontextu – jen acond entity |
+          | `button.acond_ai_context_full` | Export AI kontextu – kompletní HA |
+
+      - type: markdown
+        title: Přizpůsobení dashboardu
+        content: |
+          Tento dashboard je v **YAML módu** – klik na tužku ti zobrazí
+          hlášku *"V režimu YAML není dostupné uživatelské rozhraní pro
+          úpravy"*. Záměrně – chceme ti dál posílat updates integrace,
+          které se přes statický YAML soubor přepisují automaticky.
+
+          ### Pokud si chceš vytvořit vlastní upravitelnou kopii:
+
+          1. V HA jdi do **Settings → Dashboards → + Přidat dashboard
+             → Nový dashboard** a pojmenuj ho podle sebe (např. *Můj Acond*)
+          2. Otevři nově vytvořený dashboard v postranním menu
+          3. Klikni na **tužku** (vpravo nahoře) → tři tečky **⋮**
+             → **Editor kódu nastavení**
+          4. Smaž výchozí obsah a **vlož celý YAML** z našeho souboru
+             `acond_dashboard.yaml`
+          5. Najdi hned na začátku řádek `title: Acond TČ` a **přepiš
+             ho na svůj název panelu** (jinak budeš mít v menu dvě "Acond TČ")
+          6. Klikni **Save**
+
+          Kde najít obsah našeho YAMLu: otevři v HA addonu **File editor**
+          nebo přes SSH soubor
+          `/config/custom_components/acond/lovelace/acond_dashboard.yaml`
+          a zkopíruj jeho celý obsah.
+
+          ### Jak na updates z naší strany
+
+          Po každém update integrace (HACS / ručně) obsahuje soubor
+          `acond_dashboard.yaml` **nejnovější verzi** se všemi vylepšeními.
+          Hned na začátku souboru najdeš **changelog** v komentáři –
+          tam vidíš, co se změnilo. Pokud chceš novinky ve své kopii,
+          zkopíruj soubor znovu a v Editoru kódu nastavení proveď diff/merge
+          se svými úpravami.
+
+          ⚠️ **Pozor:** Tvoje úpravy přežijí update integrace (žijí
+          v HA storage), ale **naše vylepšení dashboardu se k tvé kopii
+          automaticky nedostávají**. Sync ze souboru je manuální.
+
+      - type: markdown
+        title: Vzory pro automatizace
+        content: |
+          ## Specifika této integrace oproti YAML Modbus
+
+          ### 1. Textové senzory – používej raw_value
+
+          Senzory jako **Režim TČ** nebo **Typ regulace** zobrazují text, ale pro
+          automatizace je spolehlivější číselný atribut `raw_value` – ten se nemění
+          při přejmenování.
+
+          ```yaml
+          # Správně – stabilní číselná hodnota
+          condition:
+            - condition: template
+              value_template: >
+                {{ state_attr('sensor.acond_30015_regulation_type', 'raw_value') == 2 }}
+
+          # Hodnoty pro Typ regulace:
+          # 0 = AcondTherm
+          # 1 = Equiterm
+          # 2 = Standard
+
+          # Hodnoty pro Režim TČ (sensor.acond_30014_hp_mode):
+          # 0 = Automatický
+          # 1 = Pouze TČ
+          # 3 = Pouze aux. topení
+          # 4 = Vypnuto
+          # 5 = Manuální
+          # 6 = Chlazení
+          ```
+
+          ### 2. Hodiny provozu – používej atribut runtime
+
+          Každý hodinový senzor má atribut `runtime` kombinující hodiny a minuty:
+
+          ```yaml
+          # Zobrazení v šabloně
+          {{ state_attr('sensor.acond_30050_compressor_hours', 'runtime') }}
+          # Výsledek: "1234 h 27 min"
+
+          # Podmínka – kompresor jel více než 1000 hodin
+          condition:
+            - condition: numeric_state
+              entity_id: sensor.acond_30050_compressor_hours
+              above: 1000
+          ```
+
+          ### 3. Tichý provoz – čas v minutách od půlnoci
+
+          Senzory 30033 a 30034 vrací minuty od půlnoci. Atribut `time` obsahuje
+          čitelný formát:
+
+          ```yaml
+          # Čitelný čas
+          {{ state_attr('sensor.acond_30033_silent_mode_start', 'time') }}
+          # Výsledek: "06:30"
+
+          # Zápis nového času přes number entitu (v minutách)
+          service: number.set_value
+          target:
+            entity_id: number.acond_40019_silent_mode_start_set
+          data:
+            value: 390   # = 06:30
+          ```
+
+          ### 4. Nastavení teploty
+
+          ```yaml
+          # Nastav teplotu TUV na 45 °C
+          service: number.set_value
+          target:
+            entity_id: number.acond_40005_t_set_tuv
+          data:
+            value: 45.0
+          ```
+
+          ### 5. Přepínání režimů TČ
+
+          ```yaml
+          # Zapni automatický režim
+          service: switch.turn_on
+          target:
+            entity_id: switch.acond_40006_tc_set_bit_0
+
+          # Přepni na režim bivalence
+          service: switch.turn_on
+          target:
+            entity_id: switch.acond_40006_tc_set_bit_2
+          ```
+
+          ### 6. Potvrzení poruchy a reset PLC
+
+          ```yaml
+          # Potvrď poruchu (tlačítko)
+          service: button.press
+          target:
+            entity_id: button.acond_40006_tc_set_bit_5
+
+          # Reset PLC – pozor, TČ se restartuje!
+          service: button.press
+          target:
+            entity_id: button.acond_40021_reset_plc_set
+          ```
+
+          ### 7. Podmínka na stav TČ (binární senzor)
+
+          ```yaml
+          # Je TČ v provozu?
+          condition:
+            - condition: state
+              entity_id: binary_sensor.acond_30007_tc_status_bit_1
+              state: "on"
+
+          # Probíhá odmrazování?
+          condition:
+            - condition: state
+              entity_id: binary_sensor.acond_30007_tc_status_bit_8
+              state: "on"
+          ```
+
+          ### 8. Spuštění AI kontext exportu
+
+          ```yaml
+          # Při poruše TČ automaticky vygeneruj export pro AI
+          automation:
+            - alias: "Acond – AI export při poruše"
+              trigger:
+                - platform: state
+                  entity_id: binary_sensor.acond_30007_tc_status_bit_2
+                  to: "on"
+              action:
+                - service: button.press
+                  target:
+                    entity_id: button.acond_ai_context_acond
+          ```
