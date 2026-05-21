@@ -40,6 +40,35 @@ A Home Assistant custom integration for **Acond heat pumps** communicating over 
 
 ---
 
+## Screenshots
+
+The integration ships with a complete multi-view Lovelace dashboard (**ACOND TČ**), generated automatically on installation:
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="images/pohled.jpg" width="250" alt="Overview view"><br>
+      <sub><b>Overview</b> — modes, component status, live power &amp; COP, temperatures</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="images/ovladani.jpg" width="250" alt="Control view"><br>
+      <sub><b>Control</b> — setpoints, modes, silent mode, external sensors</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="images/grafy.jpg" width="250" alt="Graphs view"><br>
+      <sub><b>Graphs</b> — temperature, power, energy and COP trends</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="images/diagnostika.jpg" width="250" alt="Diagnostics view"><br>
+      <sub><b>Diagnostics</b> — AI context export, error codes, status bits</sub>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## Requirements
 
 - Home Assistant **2024.11.0** or newer
@@ -79,11 +108,25 @@ After installation:
    - **Heat pump series** – `Grandis / Economis` or `PRO`
 4. Click **Submit**
 
-The integration connects to the heat pump, creates all entities, and registers a new dashboard panel ("Acond") in the HA sidebar.
+The integration connects to the heat pump, creates all entities, and registers a new dashboard panel (**ACOND TČ**) in the HA sidebar.
+
+Once setup completes, the integration appears under **Settings → Devices & services** as a single device with all entities:
+
+<p align="center">
+  <img src="images/inntegrace.jpg" width="640" alt="Acond Heat Pump integration page">
+</p>
 
 ### Modbus timeout setting
 
 Acond's internal Modbus timeout must be set to **at least 4 minutes 30 seconds** so the integration's 15-second polling interval is not interrupted. Configure this on the heat pump's own panel.
+
+### Changing the IP address later
+
+If the heat pump's IP address changes (e.g. after a router change), you do **not** need to reinstall the integration. Open the integration's **Configure** dialog and update the address – the integration reconnects automatically.
+
+<p align="center">
+  <img src="images/IP__adresa.jpg" width="640" alt="Editing the heat pump IP address">
+</p>
 
 ---
 
@@ -109,6 +152,12 @@ The integration creates approximately **115+ entities** across six platforms. Th
 
 All entities are grouped under a single device named *Acond* and the Modbus register number is included in `entity_id` for easy identification (e.g. `sensor.acond_30006_t_act_tuv`).
 
+The dashboard also includes a built-in **Help** view with a full reference of every entity and its Modbus register:
+
+<p align="center">
+  <img src="images/Napoveda.jpg" width="320" alt="Built-in Help view with the entity reference">
+</p>
+
 ---
 
 ## AI Context – helper for AI assistants
@@ -117,6 +166,10 @@ The integration can generate a **structured markdown file** with the current sta
 
 - **Fault diagnosis** – the AI sees entities, their states, the last few lines of the integration's log, and global errors
 - **YAML help** – the AI knows your entities, automations, areas, scripts, and generates YAML that fits precisely to your environment
+
+<p align="center">
+  <img src="images/AI_kontext.jpg" width="640" alt="AI Context export on the Diagnostics view">
+</p>
 
 ### Two modes (available as buttons in the Acond device)
 
@@ -133,7 +186,7 @@ Before saving the file, the integration **automatically redacts** values whose k
 
 ### Use case example: migrating from YAML Modbus configuration
 
-If you are migrating from an existing hand-written YAML modbus configuration to this integration, the AI context together with your original `configuration.yaml` form a strong tandem for automatic mapping of old entities to new ones and generating YAML patches for affected automations, scripts, templates, and Lovelace cards. The detailed procedure is described in a separate document [MIGRATION.md](MIGRATION.md).
+If you are migrating from an existing hand-written YAML modbus configuration to this integration, the AI context together with your original `configuration.yaml` form a strong tandem for automatic mapping of old entities to new ones and generating YAML patches for affected automations, scripts, templates, and Lovelace cards. The detailed procedure is described in a separate document [MIGRATION.en.md](MIGRATION.en.md).
 
 ---
 
