@@ -177,7 +177,7 @@ Tímto je slot **opravdu volný** a TČ je připraveno přijmout nového klienta
 
 ### 7. Kontrola nového dashboardu a entit
 
-1. V bočním menu HA hledej **"Acond"** — nový dashboard se měl vytvořit automaticky
+1. V bočním menu HA hledej **ACOND TČ** — nový dashboard se měl vytvořit automaticky
 2. **Otevři ho** — měl bys vidět:
    - Pohled (overview) — teploty, výkon, COP
    - Ovládání — setpointy, mode přepínače
@@ -190,7 +190,7 @@ Tímto je slot **opravdu volný** a TČ je připraveno přijmout nového klienta
 **Pokud něco selhalo:**
 - ❌ "Nelze se připojit na TČ" → zkontroluj, že IP je správná a TČ má aktivní Modbus TCP (kroky 4)
 - ❌ Entity všechny `unavailable` → stejný problém s připojením, nebo TČ má timeout pod 4:30
-- ❌ Dashboard chybí → otevři `Settings → Dashboards`, "Acond" by tam měl být
+- ❌ Dashboard chybí → otevři `Settings → Dashboards`, **ACOND TČ** by tam měl být
 
 ### 8. Vygeneruj AI kontext
 
