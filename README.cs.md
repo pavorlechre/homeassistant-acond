@@ -40,6 +40,35 @@ Custom integrace pro Home Assistant pro **tepelná čerpadla Acond** komunikují
 
 ---
 
+## Náhledy
+
+Integrace přináší kompletní vícepohledový Lovelace dashboard (**ACOND TČ**), vygenerovaný automaticky při instalaci:
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="images/pohled.jpg" width="250" alt="Pohled Pohled"><br>
+      <sub><b>Pohled</b> — režimy, stav komponent, aktuální výkon a COP, teploty</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="images/ovladani.jpg" width="250" alt="Pohled Ovládání"><br>
+      <sub><b>Ovládání</b> — setpointy, režimy, tichý provoz, externí čidla</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="images/grafy.jpg" width="250" alt="Pohled Grafy"><br>
+      <sub><b>Grafy</b> — průběhy teplot, výkonu, energie a COP</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="images/diagnostika.jpg" width="250" alt="Pohled Diagnostika"><br>
+      <sub><b>Diagnostika</b> — export AI kontextu, chybové kódy, stavové bity</sub>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## Požadavky
 
 - Home Assistant **2024.11.0** nebo novější
@@ -79,11 +108,25 @@ Po instalaci:
    - **Série tepelného čerpadla** – `Grandis / Economis` nebo `PRO`
 4. Klikni **Odeslat**
 
-Integrace se připojí k tepelnému čerpadlu, vytvoří všechny entity a zaregistruje nový dashboard panel ("Acond") v bočním menu HA.
+Integrace se připojí k tepelnému čerpadlu, vytvoří všechny entity a zaregistruje nový dashboard panel (**ACOND TČ**) v bočním menu HA.
+
+Po dokončení nastavení se integrace objeví v **Nastavení → Zařízení a služby** jako jedno zařízení se všemi entitami:
+
+<p align="center">
+  <img src="images/inntegrace.jpg" width="640" alt="Stránka integrace Acond Heat Pump">
+</p>
 
 ### Nastavení Modbus timeoutu
 
 Interní Modbus timeout tepelného čerpadla musí být nastaven na **minimálně 4 minuty 30 sekund**, aby polling integrace každých 15 sekund nezpůsobil odpojení. Nastav to přímo na panelu tepelného čerpadla.
+
+### Změna IP adresy později
+
+Pokud se IP adresa tepelného čerpadla změní (např. po výměně routeru), **není** potřeba integraci přeinstalovávat. Otevři dialog **Konfigurovat** u integrace a uprav adresu – integrace se automaticky znovu připojí.
+
+<p align="center">
+  <img src="images/IP__adresa.jpg" width="640" alt="Úprava IP adresy tepelného čerpadla">
+</p>
 
 ---
 
@@ -109,6 +152,12 @@ Integrace vytvoří přibližně **115+ entit** napříč šesti platformami. Js
 
 Všechny entity jsou seskupeny pod jedním zařízením nazvaným *Acond* a číslo Modbus registru je součástí `entity_id` pro snadnou identifikaci (např. `sensor.acond_30006_t_act_tuv`).
 
+Dashboard obsahuje i vestavěný pohled **Nápověda** s úplným přehledem všech entit a jejich Modbus registrů:
+
+<p align="center">
+  <img src="images/Napoveda.jpg" width="320" alt="Vestavěný pohled Nápověda s přehledem entit">
+</p>
+
 ---
 
 ## AI kontext – pomocník pro AI asistenty
@@ -117,6 +166,10 @@ Integrace umí vygenerovat **strukturovaný markdown soubor** s aktuálním stav
 
 - **Diagnostice poruch** – AI vidí entity, jejich stav, posledních pár řádků logu integrace a globální chyby
 - **Pomoci s YAML** – AI zná tvoje entity, automatizace, oblasti, skripty a generuje YAML, který přesně sedí na tvé prostředí
+
+<p align="center">
+  <img src="images/AI_kontext.jpg" width="640" alt="Export AI kontextu v pohledu Diagnostika">
+</p>
 
 ### Dva režimy (dostupné jako buttony v zařízení Acond)
 
