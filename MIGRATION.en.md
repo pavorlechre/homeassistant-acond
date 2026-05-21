@@ -178,7 +178,7 @@ The slot is now **truly free** and the heat pump is ready to accept a new client
 
 ### 7. Checking the new dashboard and entities
 
-1. In the HA sidebar, look for **"Acond"** — the new dashboard should have been created automatically
+1. In the HA sidebar, look for **ACOND TČ** — the new dashboard should have been created automatically
 2. **Open it** — you should see:
    - Overview (Pohled) — temperatures, power, COP
    - Control (Ovládání) — setpoints, mode toggles
@@ -191,7 +191,7 @@ The slot is now **truly free** and the heat pump is ready to accept a new client
 **If something failed:**
 - ❌ "Cannot connect to the heat pump" → check that the IP is correct and the heat pump has Modbus TCP active (step 5)
 - ❌ All entities `unavailable` → the same connection problem, or the heat pump has a timeout below 4:30
-- ❌ Dashboard missing → open `Settings → Dashboards`, "Acond" should be there
+- ❌ Dashboard missing → open `Settings → Dashboards`, **ACOND TČ** should be there
 
 ### 8. Generate the AI context
 
