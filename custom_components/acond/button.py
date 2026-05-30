@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 import logging
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
@@ -14,6 +15,18 @@ from .const import (
 from .modbus_client import AcondModbusClient
 
 _LOGGER = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Zpoždění pulzu pro bitová tlačítka (sekundy)
+# Bit zůstane nastaven po tuto dobu, pak se smaže (přechod 1→0).
+# TČ reaguje na náběžnou hranu (0→1); po provedení akce bit smaže samo –
+# nebo ho smaže integrace zde, pokud TČ nestihne (zaneprázdněnost, firmware).
+# ---------------------------------------------------------------------------
+_BIT_PULSE_DELAY: dict[str, float] = {
+    "tc_set_bit_5": 2.0,   # Potvrzení poruchy – kratší pulz
+    "tc_set_bit_8": 4.0,   # Přepnout léto/zima – delší pulz (TČ může být zaneprázdněné)
+}
+_BIT_PULSE_DELAY_DEFAULT = 2.0   # fallback pro případné budoucí bitové buttony
 
 
 async def async_setup_entry(
@@ -33,7 +46,7 @@ async def async_setup_entry(
 
     entities: list[ButtonEntity] = []
 
-    # --- Modbus tlačítka (potvrzení poruchy, reset PLC, léto/zima) ---
+    # --- Modbus tlačítka (potvrzení poruchy, reset PLC, léto/zima, reset čidel) ---
     for button_def in BUTTON_DEFINITIONS:
         entities.append(
             AcondButton(
@@ -68,13 +81,24 @@ async def async_setup_entry(
 class AcondButton(ButtonEntity):
     """Tlačítko pro jednorázovou akci přes Modbus holding registr.
 
-    Při stisku zapíše hodnotu (obvykle 1) do registru.
-    TČ si hodnotu samo vrátí na 0 po dokončení akce.
+    Dva režimy podle typu tlačítka:
 
-    Příklady:
-    - Potvrzení poruchy (bit 5 registru 40006)
-    - Reset PLC (registr 40021)
-    - Přepnutí léto/zima (bit 8 registru 40006)
+    A) Celý registr (bit=None) – prostý zápis hodnoty.
+       Příklady: Reset PLC (40021), reset externích čidel (40002/40004/40009/40010/40011).
+       TČ po restartu nebo přijetí out-of-range hodnoty registr samo vyčistí.
+
+    B) Bit v registru (bit=int) – 3-krokový pulz:
+       1. Zajisti bit=0 (opraví zaseknutý bit z předchozího stisku)
+       2. Nastav bit=1 (přechod 0→1, TČ reaguje na náběžnou hranu)
+       3. Po pulse_delay smaž bit=0 (přechod 1→0)
+
+       Příklady: Potvrzení poruchy (40006 bit 5), Přepnout léto/zima (40006 bit 8).
+
+       PROČ PULZ: TČ reaguje na přechod 0→1. Pokud bit zůstane trvale 1
+       (starý kód, zaseknutý stav), TČ příkaz ignoruje. Pulz zajistí čistý
+       přechod při každém stisku bez ohledu na předchozí stav registru.
+       Navíc každý write operace na 40006 read-modify-write zachovává ostatní
+       bity – bez čištění by zaseklý bit přežíval i přes přepínání režimů.
     """
 
     def __init__(self, client, button_def, entry_id: str, hp_series: str, host: str):
@@ -109,38 +133,93 @@ class AcondButton(ButtonEntity):
         return attrs
 
     async def async_press(self) -> None:
-        """Proveď akci – zapiš hodnotu do registru (celý nebo bit)."""
+        """Proveď akci – buď prostý zápis (celý registr) nebo pulzní zápis (bit)."""
+
         if self._button_def.bit is None:
-            # Celý registr – prostý zápis hodnoty (obvykle 1)
+            # ---------------------------------------------------------------
+            # Režim A: Celý registr – prostý zápis hodnoty
+            # ---------------------------------------------------------------
             success = await self._client.write_register(
                 self._button_def.address, self._button_def.value
             )
-        else:
-            # Bit v registru – read-modify-write
-            result = await self._client.read_holding_register(self._button_def.address)
-            if result is None:
-                _LOGGER.error(
-                    "Acond: nelze přečíst registr %s před zápisem bitu %s",
+            if success:
+                _LOGGER.debug(
+                    "Acond: button %s stisknut (registr %s, hodnota %s)",
+                    self._button_def.key,
                     self._button_def.address,
-                    self._button_def.bit,
+                    self._button_def.value,
                 )
-                return
-            new_value = result | (1 << self._button_def.bit)
-            success = await self._client.write_register(self._button_def.address, new_value)
+            else:
+                _LOGGER.error(
+                    "Acond: stisk button %s selhal (registr %s)",
+                    self._button_def.key,
+                    self._button_def.address,
+                )
+            return
 
-        if success:
-            _LOGGER.debug(
-                "Acond: button %s stisknut (registr %s, bit %s, hodnota %s)",
+        # -------------------------------------------------------------------
+        # Režim B: Bit v registru – 3-krokový pulz (clear → set → wait → clear)
+        # -------------------------------------------------------------------
+        result = await self._client.read_holding_register(self._button_def.address)
+        if result is None:
+            _LOGGER.error(
+                "Acond: nelze přečíst registr %s před pulzním zápisem bitu %s",
+                self._button_def.address,
+                self._button_def.bit,
+            )
+            return
+
+        base = result & ~(1 << self._button_def.bit)   # hodnota registru bez cílového bitu
+
+        # Krok 1: ujisti se, že bit je 0 – opraví případný zaseknutý stav
+        ok_clear = await self._client.write_register(self._button_def.address, base)
+        if not ok_clear:
+            _LOGGER.error(
+                "Acond: krok 1 (clear) selhal pro button %s (registr %s, bit %s)",
                 self._button_def.key,
                 self._button_def.address,
                 self._button_def.bit,
-                self._button_def.value,
             )
-        else:
+            return
+        await asyncio.sleep(0.5)   # krátká pauza – TČ vidí bit=0
+
+        # Krok 2: nastav bit (přechod 0→1 – TČ reaguje na náběžnou hranu)
+        ok_set = await self._client.write_register(
+            self._button_def.address, base | (1 << self._button_def.bit)
+        )
+        if not ok_set:
             _LOGGER.error(
-                "Acond: stisk button %s selhal (registr %s, bit %s)",
+                "Acond: krok 2 (set) selhal pro button %s (registr %s, bit %s)",
                 self._button_def.key,
                 self._button_def.address,
+                self._button_def.bit,
+            )
+            return
+
+        _LOGGER.debug(
+            "Acond: button %s – pulz zahájen (registr %s, bit %s, delay %.1fs)",
+            self._button_def.key,
+            self._button_def.address,
+            self._button_def.bit,
+            _BIT_PULSE_DELAY.get(self._button_def.key, _BIT_PULSE_DELAY_DEFAULT),
+        )
+
+        # Krok 3: počkej pulse_delay, pak smaž bit (přechod 1→0)
+        await asyncio.sleep(
+            _BIT_PULSE_DELAY.get(self._button_def.key, _BIT_PULSE_DELAY_DEFAULT)
+        )
+        ok_end = await self._client.write_register(self._button_def.address, base)
+        if ok_end:
+            _LOGGER.debug(
+                "Acond: button %s – pulz dokončen, bit %s smazán",
+                self._button_def.key,
+                self._button_def.bit,
+            )
+        else:
+            _LOGGER.warning(
+                "Acond: button %s – krok 3 (end clear) selhal; bit %s může zůstat na 1. "
+                "Další stisk tuto situaci opraví (krok 1 vždy čistí).",
+                self._button_def.key,
                 self._button_def.bit,
             )
 
