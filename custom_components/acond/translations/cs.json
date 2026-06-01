@@ -21,18 +21,25 @@
   "options": {
     "step": {
       "init": {
-        "title": "Úprava IP adresy",
-        "description": "Pokud se IP adresa tepelného čerpadla v síti změnila, můžeš ji zde upravit bez nutnosti reinstalace integrace. Integrace se automaticky znovu připojí na novou adresu.\n\nSérie tepelného čerpadla není editovatelná – pro její změnu je nutná reinstalace.",
+        "title": "Nastavení integrace Acond",
+        "description": "Zde můžeš upravit IP adresu tepelného čerpadla, maximální teplotu TUV a rozsah slideru kompresoru. Po uložení se integrace automaticky reloadne a nové hodnoty se okamžitě projeví v dashboardu.\n\nSérie tepelného čerpadla není editovatelná – pro její změnu je nutná reinstalace.",
         "data": {
-          "host": "IP adresa"
+          "host": "IP adresa",
+          "tuv_max_temp": "Maximální teplota TUV (°C)",
+          "comp_capacity_min": "Minimum slideru kompresoru",
+          "comp_capacity_max": "Maximum slideru kompresoru"
         },
         "data_description": {
-          "host": "Nová IP adresa tepelného čerpadla v síti (např. 192.168.1.100)"
+          "host": "Nová IP adresa tepelného čerpadla v síti (např. 192.168.1.100)",
+          "tuv_max_temp": "Rozsah 50–60 °C. Default 50 °C (Acond v praxi přijme bez servisního zásahu). Hodnoty 51–60 vyžadují servisní odemčení tepelného čerpadla.",
+          "comp_capacity_min": "Nejnižší hodnota, kterou půjde nastavit slider Max. otáček/výkonu kompresoru (40014). Lze zúžit pro ochranu nebo rozšířit pro servisně odemčený rozsah.",
+          "comp_capacity_max": "Nejvyšší hodnota, kterou půjde nastavit slider Max. otáček/výkonu kompresoru (40014)."
         }
       }
     },
     "error": {
-      "invalid_host": "Neplatná IP adresa"
+      "invalid_host": "Neplatná IP adresa",
+      "comp_min_ge_max": "Minimum kompresoru musí být menší než maximum"
     }
   }
 }
