@@ -143,17 +143,53 @@ _global_error_collector: _GlobalErrorCollector | None = None
 
 
 def install_log_collector() -> None:
-    """Zavěs oba ring buffery. Volat jednou při setupu integrace."""
+    """Zavěs oba ring buffery. Volat při každém setupu integrace.
+
+    OPRAVA bugu A (ROADMAP v0.2.0): Funkce je idempotentní a robustní vůči
+    HA restartům.
+
+    Problém před opravou: HA „Restart" nerestartuje Python proces, takže
+    module-level proměnné `_log_collector` a `_global_error_collector`
+    přežívají. Při HA restartu se ale logging stack resetuje – staré
+    handlery jsou tiše odpojené z loggerů, ale my si stále držíme
+    referenci a `if _log_collector is None` vyhodnotí False → nic
+    nepřipojíme. Výsledek: po restartu se do bufferu nic nepíše a
+    `tail()` vrátí stará data z minulého běhu (potvrzeno: záznamy
+    z 25. 5. v exportu z 30. 5.).
+
+    Nová logika:
+    1) Pokud existuje starý collector, odpoj ho z loggerů a zahoď
+       (i kdyby tam nebyl, removeHandler je no-op).
+    2) Vytvoř nový collector s prázdným bufferem.
+    3) Připoj nový collector k loggeru.
+
+    Tím garantujeme, že po každém setupu je aktivní právě jeden čerstvý
+    handler s prázdným bufferem. Žádné duplicitní handlery, žádná stará data.
+    """
     global _log_collector, _global_error_collector
 
-    if _log_collector is None:
-        _log_collector = _AcondLogCollector()
-        logging.getLogger(f"custom_components.{DOMAIN}").addHandler(_log_collector)
+    # --- acond logger (custom_components.acond) ---
+    acond_logger = logging.getLogger(f"custom_components.{DOMAIN}")
+    if _log_collector is not None:
+        # Defensivně odpoj starý handler (může nebo nemusí být připojený)
+        acond_logger.removeHandler(_log_collector)
+    _log_collector = _AcondLogCollector()
+    acond_logger.addHandler(_log_collector)
 
-    if _global_error_collector is None:
-        _global_error_collector = _GlobalErrorCollector()
-        # Root logger – zachytí všechno z HA
-        logging.getLogger().addHandler(_global_error_collector)
+    # Nastav logger na INFO, pokud je výš (WARNING / ERROR / NOTSET).
+    # Logger filtruje záznamy PŘED předáním handleru – bez tohoto nastavení
+    # by handler (úroveň DEBUG) dostával jen WARNING+ záznamy a integrace
+    # by tak ztratila informativní log "Acond: nastavuji integraci..." atd.
+    # DEBUG (user-enabled „Povolit logování ladících informací") nesnižujeme.
+    if acond_logger.level == logging.NOTSET or acond_logger.level > logging.INFO:
+        acond_logger.setLevel(logging.INFO)
+
+    # --- root logger (errory napříč HA) ---
+    root_logger = logging.getLogger()
+    if _global_error_collector is not None:
+        root_logger.removeHandler(_global_error_collector)
+    _global_error_collector = _GlobalErrorCollector()
+    root_logger.addHandler(_global_error_collector)
 
 
 def uninstall_log_collector() -> None:
