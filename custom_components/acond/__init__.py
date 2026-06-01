@@ -73,6 +73,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Probe – zjisti které registry TČ podporuje
     supported_keys = await _probe_registers(client)
 
+    # Forward declaration coordinatoru, aby ho async_update_data viděl
+    # přes closure. Skutečně se naplní pár řádků níže.
+    coordinator: DataUpdateCoordinator | None = None
+
     # Coordinator – poluje všechny nalezené input registry (FC4)
     # plus vybrané holding registry přímo přes FC3 (KROK 2.5 – FC3 read-back).
     async def async_update_data() -> dict:
@@ -82,8 +86,29 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         1. Input registry (30xxx, FC4) – přes probe-detekované klíče
         2. Holding registry (40xxx, FC3) – statický seznam HOLDING_REGISTERS_TO_POLL
            pro entity, jejichž 30xxx pendant nemá pasivní zrcadlo (KROK 2.5).
+
+        CARRY-FORWARD: `data` startuje jako KOPIE předchozího coordinator.data,
+        ne jako prázdný dict. Když read selže (timeout, transient chyba),
+        klíč v dictu zůstane s předchozí hodnotou a entita nesklouzne
+        na "unknown". Bez tohoto chování utility_meter součty zaznamenají
+        přechod hodnota→unknown→hodnota a vytvoří falešný spotřební skok
+        (potvrzeno diagnostikou energetických senzorů 30035 / 30039
+        24.5.2026; viz DECISIONS.md a ROADMAP bod 7).
+
+        Failure mode: pokud v celém cyklu NIC nepřečteme úspěšně
+        (`successful_reads == 0`), raisneme UpdateFailed – tím dáme
+        DataUpdateCoordinatoru signál, že je integrace v ohrožení.
+        Entity začnou hlásit "unavailable", což je správný stav při
+        úplné ztrátě spojení s TČ (TČ vypnuté, výpadek sítě atd.).
         """
-        data = {}
+        # Carry-forward base. coordinator.data je None před prvním úspěšným
+        # refreshem – v tom případě začínáme od prázdného dictu.
+        if coordinator is not None and coordinator.data:
+            data = dict(coordinator.data)
+        else:
+            data = {}
+
+        successful_reads = 0
 
         # --- Fáze 1: input registry (30xxx) ---
         for sensor in SENSOR_DEFINITIONS:
@@ -92,6 +117,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             count = 2 if sensor.dint else 1
             result = await client.read_input_registers(sensor.address, count=count)
             if result is None:
+                # Carry-forward: předchozí hodnota klíče v `data` zůstává.
+                # Modbus klient už logoval na DEBUG.
                 continue
             if sensor.dint:
                 # 32bit hodnota přes dva registry (big endian)
@@ -101,6 +128,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 if sensor.signed and raw > 32767:
                     raw -= 65536
             data[sensor.key] = round(raw * sensor.scale, 2)
+            successful_reads += 1
 
         # --- Fáze 2: holding registry (40xxx) přes FC3 ---
         # Self-mirror pattern: hodnota se ukládá pod klíčem zápisové entity,
@@ -108,16 +136,23 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         for address, key, scale, signed in HOLDING_REGISTERS_TO_POLL:
             raw = await client.read_holding_register(address)
             if raw is None:
-                # Starší firmware nebo přechodná chyba – nezahazujeme předchozí
-                # hodnotu z coordinator.data (DataUpdateCoordinator si ji drží),
-                # jen tento cyklus key chybí. Modbus klient logoval na DEBUG.
+                # Carry-forward jako v Fázi 1.
                 continue
             if signed and raw > 32767:
                 raw -= 65536
             data[key] = round(raw * scale, 2)
+            successful_reads += 1
 
-        if not data:
-            raise UpdateFailed("Acond: žádná data ze žádného registru")
+        # Pokud v tomto cyklu neselhalo úplně všechno, předáme data
+        # s carry-forward hodnotami. Pokud selhalo VŠE (TČ je offline,
+        # síť spadla), raisneme UpdateFailed → entity půjdou na unavailable
+        # po standardním HA grace period (3 cykly = 45 s při 15s pollingu).
+        if successful_reads == 0:
+            raise UpdateFailed(
+                "Acond: žádný registr úspěšně přečten v tomto cyklu "
+                "(úplná ztráta spojení s TČ?)"
+            )
+
         return data
 
     coordinator = DataUpdateCoordinator(
