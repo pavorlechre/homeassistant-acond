@@ -11,6 +11,11 @@ from .const import (
     DOMAIN,
     CONF_HOST,
     CONF_HP_SERIES,
+    CONF_TUV_MAX,
+    CONF_COMP_MIN,
+    CONF_COMP_MAX,
+    TUV_MAX_DEFAULT,
+    COMP_CAPACITY_BOUNDS,
     NUMBER_DEFINITIONS,
     WRITE_KEY_TO_MIRROR_KEY,
 )
@@ -38,6 +43,15 @@ async def async_setup_entry(
     hp_series = entry.data.get(CONF_HP_SERIES, "Grandis / Economis")
     host = entry.data[CONF_HOST]
 
+    # Options overrides (z OptionsFlow). Default = const.py hodnoty.
+    # TUV max: default 50 °C, lze zvýšit na 50–60 servisně odemčenou TČ.
+    # Comp min/max: default = nominal range série, lze zúžit i rozšířit
+    # v rámci absolutních mezí (COMP_CAPACITY_BOUNDS).
+    _abs_min, _abs_max, default_comp_min, default_comp_max, _u, _s = COMP_CAPACITY_BOUNDS[hp_series]
+    tuv_max_override = entry.options.get(CONF_TUV_MAX, TUV_MAX_DEFAULT)
+    comp_min_override = entry.options.get(CONF_COMP_MIN, default_comp_min)
+    comp_max_override = entry.options.get(CONF_COMP_MAX, default_comp_max)
+
     entities = []
     for number_def in NUMBER_DEFINITIONS:
         entities.append(
@@ -48,6 +62,9 @@ async def async_setup_entry(
                 entry_id=entry.entry_id,
                 hp_series=hp_series,
                 host=host,
+                tuv_max_override=tuv_max_override,
+                comp_min_override=comp_min_override,
+                comp_max_override=comp_max_override,
             )
         )
 
@@ -69,7 +86,18 @@ class AcondNumber(CoordinatorEntity, NumberEntity):
     nesmyslné hodnoty mimo slider rozsah).
     """
 
-    def __init__(self, coordinator, client, number_def, entry_id: str, hp_series: str, host: str):
+    def __init__(
+        self,
+        coordinator,
+        client,
+        number_def,
+        entry_id: str,
+        hp_series: str,
+        host: str,
+        tuv_max_override: float | None = None,
+        comp_min_override: int | None = None,
+        comp_max_override: int | None = None,
+    ):
         super().__init__(coordinator)
         self._number_def = number_def
         self._client: AcondModbusClient = client
@@ -93,22 +121,31 @@ class AcondNumber(CoordinatorEntity, NumberEntity):
             if hp_series == "PRO":
                 self._attr_name = "Max. výkon kompresoru"
                 self._attr_native_unit_of_measurement = UnitOfPower.WATT
-                self._attr_native_min_value = 2000
-                self._attr_native_max_value = 20000
                 self._attr_native_step = 100
             else:
-                # Standard série (Grandis / Economis): dle Modbus protokolu
-                # rozsah 40014 je 1800–6000 rpm (ne 7000, jak bylo dříve – bug fix)
+                # Standard série (Grandis / Economis): rpm
                 self._attr_name = "Max. otáčky kompresoru"
                 self._attr_native_unit_of_measurement = "rpm"
-                self._attr_native_min_value = 1800
-                self._attr_native_max_value = 6000
                 self._attr_native_step = 1
+            # Min/Max ze série defaults, případně override z options flow.
+            # comp_*_override jsou None pokud uživatel v options nic nenastavil
+            # (= použij hodnoty z NUMBER_DEFINITIONS / hardcoded fallback).
+            self._attr_native_min_value = (
+                comp_min_override if comp_min_override is not None else number_def.min_value
+            )
+            self._attr_native_max_value = (
+                comp_max_override if comp_max_override is not None else number_def.max_value
+            )
         else:
             self._attr_name = number_def.name
             self._attr_native_unit_of_measurement = number_def.unit
             self._attr_native_min_value = number_def.min_value
-            self._attr_native_max_value = number_def.max_value
+            # TUV max override – jen pro t_set_tuv, jinde definice z NUMBER_DEFINITIONS.
+            # Default v const.py je 50 °C, options flow umožní 50–60.
+            if number_def.key == "t_set_tuv" and tuv_max_override is not None:
+                self._attr_native_max_value = float(tuv_max_override)
+            else:
+                self._attr_native_max_value = number_def.max_value
             self._attr_native_step = number_def.step
 
     @property
