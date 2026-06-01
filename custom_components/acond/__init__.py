@@ -176,12 +176,27 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "supported_keys": supported_keys,
     }
 
+    # Při změně options (TUV max, rozsah slideru kompresoru, IP) integrace
+    # se automaticky reloadne, entity dostanou nové meze / connection.
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
+
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Zaregistruj Lovelace dashboard jako postranní panel
     await async_register_dashboard(hass)
 
     return True
+
+
+async def _async_options_updated(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Listener pro změnu options – reloadne integraci.
+
+    Volá se po každém uložení Options Flow formuláře. Reload odpojí
+    starý Modbus klient (s případně starou IP), znovu spustí setup,
+    coordinator a entity. Slider kompresoru a TUV max dostanou nové meze.
+    """
+    _LOGGER.info("Acond: options změněny, reloaduji integraci")
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
