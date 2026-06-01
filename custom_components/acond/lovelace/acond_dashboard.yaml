@@ -1,8 +1,23 @@
 ###############################################################################
 # Acond Heat Pump – Lovelace dashboard
-# v0.25 (15.5.2026)
+# v0.26 (1.6.2026)
 #
-# Změny oproti v0.24:
+# Změny oproti v0.25:
+#  - Pohled view: NOVÁ podmíněná sekce pod "Režim TČ" pro aktivní chybu
+#    (zobrazí se jen když TČ hlásí chybu – sensor 30021). Implementace
+#    používá grid section s `visibility:` na úrovni sekce (HA 2024.3+),
+#    NE conditional kartu – ta v sections view způsobí "Chyba nastavení".
+#  - Ovládání view: sekce "Servisní akce" přepsána z entities karty
+#    na vertical-stack se 3× tile kartami. Důvod: entities karta měla
+#    aktivní jen text "Stisknout" vpravo, ne celý řádek – matoucí UX.
+#    Vertical-stack drží 3 tile karty pohromadě jako jeden blok (jinak
+#    by se v masonry layoutu rozmístily do různých sloupců dle šířky
+#    obrazovky). Současně migrace tap_action z call-service na
+#    perform-action syntaxi (HA 2026.x doporučená syntaxe).
+#  - Návaznost na opravu button.py (3-krokový pulz pro bitová tlačítka
+#    léto/zima a potvrzení poruchy) v integraci v0.2.0.
+#
+# Změny oproti v0.24 (v0.25):
 #  - Sekce "Přizpůsobení dashboardu" v Nápovědě OPRAVENA: původní návod
 #    skrz "Nový dashboard z YAML konfigurace" by uživatele zavedl do
 #    identické pasti (yaml mode = UI editor opět zakázaný). Nový postup
@@ -144,6 +159,62 @@ views:
                     entity_id: switch.acond_40006_tc_set_bit_4
                   confirmation:
                     text: "Přepnout na režim chlazení?"
+
+      # =====================================================================
+      # 1b. Aktivní chyba TČ – sekce s vlastní visibility (HA 2024.3+)
+      # =====================================================================
+      # Zobrazí se, když sensor.acond_30021_err_number má jiný stav než
+      # "OK" / "unknown" / "unavailable". Patří hned za Sekci 1 (Režim TČ),
+      # aby si uživatel chyby všiml ihned po otevření Pohled view.
+      #
+      # POZOR: Pohled view je typu `sections` (oddíly). Conditional karty
+      # do něj NEPATŘÍ jako samostatná položka v `sections:` – HA hlásí
+      # "Chyba nastavení". Místo toho používáme `visibility:` na úrovni
+      # grid sekce – sekce sama o sobě je grid a HA ji skryje/zobrazí
+      # dle stavu sensoru.
+      #
+      # Pro testování bez reálné chyby: Dev Tools → Stavy → najít
+      # sensor.acond_30021_err_number → nastavit State na např.
+      # "A12 – High pressure" → Set state. Karta se okamžitě zobrazí;
+      # po ~15 s coordinator přepíše zpět na skutečnou hodnotu.
+      - type: grid
+        column_span: 4
+        visibility:
+          - condition: state
+            entity: sensor.acond_30021_err_number
+            state_not:
+              - "OK"
+              - "unknown"
+              - "unavailable"
+        cards:
+          - type: heading
+            heading: 🚨 Aktivní chyba TČ
+            heading_style: title
+            icon: mdi:alert-circle
+          - type: entity
+            entity: sensor.acond_30021_err_number
+            name: Popis chyby
+            icon: mdi:alert
+            state_content:
+              - state
+          - type: tile
+            entity: button.acond_40006_tc_set_bit_5
+            name: Potvrdit a resetovat chybu
+            icon: mdi:check-circle-outline
+            tap_action:
+              action: perform-action
+              perform_action: button.press
+              target:
+                entity_id: button.acond_40006_tc_set_bit_5
+              confirmation:
+                text: Opravdu potvrdit chybu a pokusit se o restart TČ?
+            icon_tap_action:
+              action: perform-action
+              perform_action: button.press
+              target:
+                entity_id: button.acond_40006_tc_set_bit_5
+              confirmation:
+                text: Opravdu potvrdit chybu a pokusit se o restart TČ?
 
       # =====================================================================
       # 2. Stav komponent – 8 binary sensorů
@@ -594,33 +665,87 @@ views:
           - entity: sensor.acond_30019_t_set_water_outlet
             name: Aktuální nastavení v TČ
 
-      # --- Nebezpečné akce – všechny s potvrzením ---
-      - type: entities
-        title: ⚠️ Servisní akce
-        entities:
-          - entity: button.acond_40006_tc_set_bit_5
+      # =====================================================================
+      # ⚠️ Servisní akce – vertical-stack se 3× tile kartami
+      # =====================================================================
+      # Historicky byla tato sekce v entities kartě, ale ta měla aktivní jen
+      # link "Stisknout" vpravo – matoucí UX (klik kdekoli jinde nedělal nic).
+      # Tile karta má jednotnou klikací plochu a stejnou perform-action
+      # syntaxi jako zbytek dashboardu (HA 2026.x).
+      #
+      # Důležité: vertical-stack drží 3 tile karty pohromadě jako jeden blok.
+      # Bez stacku by je masonry layout Ovládání view rozmístil do různých
+      # sloupců dle šířky obrazovky – jinak na PC, jinak na mobilu.
+      #
+      # Návaznost na opravu button.py v integraci v0.2.0: bitová tlačítka
+      # (Potvrzení poruchy 40006 bit 5, Přepnout léto/zima 40006 bit 8)
+      # nyní v backendu generují 3-krokový pulz (clear → set → wait → clear),
+      # který opraví zaseknutý bit a TČ spolehlivě zaznamená náběžnou hranu.
+      - type: vertical-stack
+        cards:
+          - type: heading
+            heading: ⚠️ Servisní akce
+            heading_style: title
+            icon: mdi:wrench
+
+          - type: tile
+            entity: button.acond_40006_tc_set_bit_5
             name: Potvrzení poruchy
+            icon: mdi:check-circle-outline
             tap_action:
-              action: call-service
-              service: button.press
+              action: perform-action
+              perform_action: button.press
               target:
                 entity_id: button.acond_40006_tc_set_bit_5
               confirmation:
                 text: Opravdu potvrdit aktuální poruchu? TČ se pokusí o restart.
-          - entity: button.acond_40006_tc_set_bit_8
+            hold_action:
+              action: none
+            icon_tap_action:
+              action: perform-action
+              perform_action: button.press
+              target:
+                entity_id: button.acond_40006_tc_set_bit_5
+              confirmation:
+                text: Opravdu potvrdit aktuální poruchu? TČ se pokusí o restart.
+
+          - type: tile
+            entity: button.acond_40006_tc_set_bit_8
             name: Přepnout léto / zima
+            icon: mdi:sun-snowflake
             tap_action:
-              action: call-service
-              service: button.press
+              action: perform-action
+              perform_action: button.press
               target:
                 entity_id: button.acond_40006_tc_set_bit_8
               confirmation:
                 text: Přepnout provozní režim léto/zima?
-          - entity: button.acond_40021_reset_plc_set
+            hold_action:
+              action: none
+            icon_tap_action:
+              action: perform-action
+              perform_action: button.press
+              target:
+                entity_id: button.acond_40006_tc_set_bit_8
+              confirmation:
+                text: Přepnout provozní režim léto/zima?
+
+          - type: tile
+            entity: button.acond_40021_reset_plc_set
             name: Reset PLC
+            icon: mdi:restart-alert
             tap_action:
-              action: call-service
-              service: button.press
+              action: perform-action
+              perform_action: button.press
+              target:
+                entity_id: button.acond_40021_reset_plc_set
+              confirmation:
+                text: "POZOR: Reset PLC restartuje řídicí jednotku. Pokračovat jen pokud víte, co děláte!"
+            hold_action:
+              action: none
+            icon_tap_action:
+              action: perform-action
+              perform_action: button.press
               target:
                 entity_id: button.acond_40021_reset_plc_set
               confirmation:
