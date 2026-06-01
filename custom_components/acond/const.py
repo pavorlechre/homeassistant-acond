@@ -11,6 +11,27 @@ CONF_HP_SERIES = "hp_series"       # "PRO" nebo "Grandis / Economis" – volí u
 DEFAULT_SCAN_INTERVAL = 15         # sekund
 
 # ---------------------------------------------------------------------------
+# Options flow – konstanty pro uživatelské přizpůsobení
+# ---------------------------------------------------------------------------
+# TUV: dle protokolu je strop 46 °C, ale Acond v praxi přijme 50 °C bez
+# jakéhokoli servisního zásahu. Pro servisně odemčené TČ lze povolit až 60 °C.
+# Default v const.py je 50, options flow povoluje 50–60 (50 = bez zásahu).
+CONF_TUV_MAX = "tuv_max_temp"
+TUV_MAX_BOUNDS = (50, 60)          # (min, max) hodnoty volitelné v options flow
+TUV_MAX_DEFAULT = 50               # = native_max_value v NUMBER_DEFINITIONS
+
+# Slider kompresoru (40014) – rozsah závisí na sérii TČ. Uživatel může v options
+# flow zúžit (např. ochrana proti přetížení) i rozšířit (servisně odemčený rozsah)
+# v rámci absolutních mezí dle série.
+CONF_COMP_MIN = "comp_capacity_min"
+CONF_COMP_MAX = "comp_capacity_max"
+COMP_CAPACITY_BOUNDS: dict[str, tuple[int, int, int, int, str, int]] = {
+    # series: (abs_min, abs_max, default_min, default_max, unit, step)
+    "Grandis / Economis": (1000, 6000, 1800, 6000, "rpm", 1),
+    "PRO":                (2000, 20000, 2000, 20000, "W",  100),
+}
+
+# ---------------------------------------------------------------------------
 # Chybové kódy – základní (registr 30021)
 # ---------------------------------------------------------------------------
 ERROR_CODES: dict[int, str] = {
@@ -509,7 +530,7 @@ NUMBER_DEFINITIONS: list[AcondNumberDefinition] = [
     AcondNumberDefinition("t_corr_indoor1",      "Teplota okruh 1 z ext. senzoru",      40002, 0.1, UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE,  0.0, 50.0, 0.1),
     AcondNumberDefinition("t_set_indoor2",       "Požadovaná teplota okruh 2",              40003, 0.1, UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE, 10.0, 30.0, 0.1),
     AcondNumberDefinition("t_corr_indoor2",      "Teplota okruh 2 z ext. senzoru",      40004, 0.1, UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE,  0.0, 50.0, 0.1),
-    AcondNumberDefinition("t_set_tuv",           "Požadovaná teplota TUV",                 40005, 0.1, UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE, 10.0, 46.0, 0.1),
+    AcondNumberDefinition("t_set_tuv",           "Požadovaná teplota TUV",                 40005, 0.1, UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE, 10.0, 50.0, 0.1),
     # Zpátečka
     AcondNumberDefinition("t_set_water_back",    "Požadovaná teplota zpátečky - Standard",           40008, 0.1, UnitOfTemperature.CELSIUS, SensorDeviceClass.TEMPERATURE, 10.0, 65.0, 0.1),
     # Korekce senzorů – hodnoty mimo rozsah → Acond použije vlastní čidlo
