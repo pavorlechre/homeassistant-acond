@@ -21,18 +21,25 @@
   "options": {
     "step": {
       "init": {
-        "title": "Edit IP address",
-        "description": "If the heat pump's IP address on your network has changed, you can update it here without reinstalling the integration. The integration will automatically reconnect to the new address.\n\nHeat pump series cannot be edited – changing it requires a reinstall.",
+        "title": "Acond integration settings",
+        "description": "Here you can edit the heat pump IP address, the maximum DHW temperature, and the compressor slider range. After saving, the integration reloads automatically and new values take effect immediately in the dashboard.\n\nHeat pump series cannot be edited – changing it requires a reinstall.",
         "data": {
-          "host": "IP Address"
+          "host": "IP Address",
+          "tuv_max_temp": "Maximum DHW temperature (°C)",
+          "comp_capacity_min": "Compressor slider minimum",
+          "comp_capacity_max": "Compressor slider maximum"
         },
         "data_description": {
-          "host": "New IP address of the heat pump on your network (e.g. 192.168.1.100)"
+          "host": "New IP address of the heat pump on your network (e.g. 192.168.1.100)",
+          "tuv_max_temp": "Range 50–60 °C. Default 50 °C (Acond accepts this without any service unlock). Values 51–60 require service-unlocked heat pump.",
+          "comp_capacity_min": "Lowest value selectable on the compressor max speed/power slider (40014). Can be narrowed for safety or widened for service-unlocked range.",
+          "comp_capacity_max": "Highest value selectable on the compressor max speed/power slider (40014)."
         }
       }
     },
     "error": {
-      "invalid_host": "Invalid IP address"
+      "invalid_host": "Invalid IP address",
+      "comp_min_ge_max": "Compressor minimum must be lower than maximum"
     }
   }
 }
