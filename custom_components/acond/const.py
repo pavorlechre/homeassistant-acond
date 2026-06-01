@@ -4,7 +4,7 @@ from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import UnitOfTemperature, UnitOfPower, UnitOfEnergy, PERCENTAGE
 
 DOMAIN = "acond"
-VERSION = "0.0.1"
+VERSION = "0.2.0"
 CONF_HOST = "host"
 CONF_MODEL = "model"
 CONF_HP_SERIES = "hp_series"       # "PRO" nebo "Grandis / Economis" – volí uživatel při instalaci
