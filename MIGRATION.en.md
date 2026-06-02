@@ -183,7 +183,7 @@ The slot is now **truly free** and the heat pump is ready to accept a new client
    - Overview (Pohled) — temperatures, power, COP
    - Control (Ovládání) — setpoints, mode toggles
 3. **Settings → Devices & Services → Acond Heat Pump** — you should see:
-   - Version: 0.1.0
+   - Version: 0.2.0
    - 1 device "Acond"
    - 117 entities
    - No errors
