@@ -3,7 +3,7 @@
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Home Assistant](https://img.shields.io/badge/HA-2024.11%2B-blue.svg)](https://www.home-assistant.io/)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/pavorlechre/homeassistant-acond/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/pavorlechre/homeassistant-acond/releases)
 
 > 🇬🇧 **This documentation is also available in English:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 
 ## ⚠️ Beta verze
 
-Integrace je momentálně v beta fázi (v0.1.0). Byla vyvinuta a otestována na reálném hardware, ale ještě nebyla ověřena širší uživatelskou základnou. **Očekávejte občasné chyby a změny rozhraní** až do verze v1.0.0. Chyby prosím hlaste na [stránce Issues](https://github.com/pavorlechre/homeassistant-acond/issues).
+Integrace je momentálně v beta fázi (v0.2.0). Byla vyvinuta a otestována na reálném hardware, ale ještě nebyla ověřena širší uživatelskou základnou. **Očekávejte občasné chyby a změny rozhraní** až do verze v1.0.0. Chyby prosím hlaste na [stránce Issues](https://github.com/pavorlechre/homeassistant-acond/issues).
 
 ---
 
@@ -127,6 +127,17 @@ Pokud se IP adresa tepelného čerpadla změní (např. po výměně routeru), *
 <p align="center">
   <img src="images/IP__adresa.jpg" width="640" alt="Úprava IP adresy tepelného čerpadla">
 </p>
+
+### Pokročilá nastavení (dialog Konfigurovat)
+
+V dialogu **Konfigurovat** lze beze ztráty integrace upravit i dvě další nastavení:
+
+- **Maximální teplota TUV** – default 50 °C (Acond v praxi přijme bez servisního odemčení). Rozsah 50–60 °C; hodnoty nad 50 vyžadují servisně odemčenou TČ.
+- **Rozsah slideru kompresoru** (registr 40014) – Min a Max pro slider *Max. otáčky/výkon kompresoru*. Defaulty:
+  - Grandis / Economis: 1800–6000 rpm (absolutní rozsah 1000–6000)
+  - PRO: 2000–20000 W (absolutní rozsah 2000–20000)
+
+Změny se projeví okamžitě po uložení – integrace se sama reloadne a entity dostanou nové meze.
 
 ---
 
