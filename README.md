@@ -3,7 +3,7 @@
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Home Assistant](https://img.shields.io/badge/HA-2024.11%2B-blue.svg)](https://www.home-assistant.io/)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue.svg)](https://github.com/pavorlechre/homeassistant-acond/releases)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/pavorlechre/homeassistant-acond/releases)
 
 > 🇨🇿 **Tato dokumentace je dostupná i v češtině:** [README.cs.md](README.cs.md)
 
@@ -11,7 +11,7 @@
 
 ## ⚠️ Beta Release
 
-This integration is currently in beta (v0.1.0). It has been developed and tested on real hardware but has not yet been validated by a wider user base. **Expect occasional bugs and breaking changes** until v1.0.0. Please report issues on the [Issues page](https://github.com/pavorlechre/homeassistant-acond/issues).
+This integration is currently in beta (v0.2.0). It has been developed and tested on real hardware but has not yet been validated by a wider user base. **Expect occasional bugs and breaking changes** until v1.0.0. Please report issues on the [Issues page](https://github.com/pavorlechre/homeassistant-acond/issues).
 
 ---
 
@@ -127,6 +127,17 @@ If the heat pump's IP address changes (e.g. after a router change), you do **not
 <p align="center">
   <img src="images/IP__adresa.jpg" width="640" alt="Editing the heat pump IP address">
 </p>
+
+### Advanced settings (Configure dialog)
+
+The **Configure** dialog also lets you adjust two more settings without reinstalling:
+
+- **Maximum DHW temperature** – default 50 °C (Acond accepts this without service unlock). Range 50–60 °C; values above 50 require a service-unlocked heat pump.
+- **Compressor slider range** (register 40014) – Min and Max for the *Max. compressor speed/power* slider. Defaults:
+  - Grandis / Economis: 1800–6000 rpm (absolute bounds 1000–6000)
+  - PRO: 2000–20000 W (absolute bounds 2000–20000)
+
+Changes apply immediately after saving – the integration reloads automatically and entities pick up the new limits.
 
 ---
 
