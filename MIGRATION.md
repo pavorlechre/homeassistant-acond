@@ -182,7 +182,7 @@ Tímto je slot **opravdu volný** a TČ je připraveno přijmout nového klienta
    - Pohled (overview) — teploty, výkon, COP
    - Ovládání — setpointy, mode přepínače
 3. **Settings → Devices & Services → Acond Heat Pump** — měl bys vidět:
-   - Verze: 0.1.0
+   - Verze: 0.2.0
    - 1 zařízení "Acond"
    - 117 entit
    - Žádné chyby
