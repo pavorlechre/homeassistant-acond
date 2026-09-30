@@ -20,6 +20,14 @@ Detekce je založená čistě na EXISTENCI SOUBORU (ne na `hass.config.component
 takže je odolná na pořadí setupu. Změna v add-onu se projeví po restartu HA
 (dashboard se generuje při každém startu) – ne živě.
 
+VSUVKY (sloty, v0.3.0): kromě oken na konci smí add-on nahradit
+vyjmenovaná místa v oknech Acondu. Místo označuje karta se značkou
+`acond_slot: <jméno>` v základu; povolená jména jsou v `SLOTS`. Add-on
+dodá soubor se seznamem sekcí, které se vloží místo sekce se značkou
+(karta se značkou zmizí, zbytek sekce zůstane pod vsuvkou). Když add-on
+vsuvku nedodá, okno zůstane beze změny – žádný teaser uvnitř okna.
+Značky `acond_slot` se z výsledku vždy odstraní.
+
 Skládání je best-effort: když cokoli selže (nečitelný základ, nezapsatelný
 výstup…), zaregistruje se čistý základ a integrace běží dál normálně.
 
@@ -73,8 +81,19 @@ ADDONS: list[dict] = [
             "custom_components/acond_regulator/dashboard/views.yaml",
             "custom_components/acond_regulator/dashboard/view.yaml",
         ],
+        # Vsuvky: jméno slotu → soubor se seznamem sekcí (sections view).
+        "slot_files": {
+            "pohled_stav": "custom_components/acond_regulator/dashboard/pohled_schema.yaml",
+        },
     },
 ]
+
+# Místa, která smí add-on nahradit: jméno slotu → path okna Acondu.
+# Karta se značkou `acond_slot: <jméno>` musí být v tomto okně.
+SLOTS: dict[str, str] = {
+    "pohled_stav": "pohled",
+}
+SLOT_KEY = "acond_slot"
 
 # Jak by si měl uživatel dashboard přidat ručně, kdyby automatická
 # registrace selhala
@@ -159,6 +178,83 @@ async def _addon_views(hass: HomeAssistant, addon: dict) -> list[dict]:
     return [_teaser_view(addon)]
 
 
+def _normalize_sections(data) -> list[dict]:
+    """Z vsuvky add-onu udělej seznam sekcí (dictů s kartami)."""
+    if isinstance(data, dict):
+        data = data.get("sections", [data] if "cards" in data else [])
+    if not isinstance(data, list):
+        return []
+    return [s for s in data if isinstance(s, dict) and isinstance(s.get("cards"), list)]
+
+
+async def _addon_slots(hass: HomeAssistant, addon: dict) -> dict[str, list[dict]]:
+    """Načti vsuvky add-onu. Chybějící nebo rozbitý soubor = vsuvka se nepoužije."""
+    from homeassistant.util.yaml import load_yaml
+
+    result: dict[str, list[dict]] = {}
+    for slot, rel in addon.get("slot_files", {}).items():
+        if slot not in SLOTS:
+            _LOGGER.warning("Acond: neznámý slot '%s' od add-onu '%s' – vynechán",
+                            slot, addon.get("title"))
+            continue
+        path = hass.config.path(rel)
+        if not os.path.exists(path):
+            continue
+        try:
+            data = await hass.async_add_executor_job(load_yaml, path)
+        except Exception as err:
+            _LOGGER.warning("Acond: vsuvka '%s' – soubor %s nečitelný (%s), "
+                            "okno zůstává beze změny", slot, path, err)
+            continue
+        sections = _normalize_sections(data)
+        if not sections:
+            _LOGGER.warning("Acond: vsuvka '%s' – soubor %s neobsahuje sekce, "
+                            "okno zůstává beze změny", slot, path)
+            continue
+        _LOGGER.info("Acond: vsuvka '%s' načtena z %s (%d sekcí)",
+                     slot, path, len(sections))
+        result[slot] = sections
+    return result
+
+
+def _apply_slots(views: list[dict], replacements: dict[str, list[dict]]) -> None:
+    """Nahraď sekce se značkou slotu vsuvkami add-onů (na místě)."""
+    for view in views:
+        sections = view.get("sections")
+        if not isinstance(sections, list):
+            continue
+        new_sections: list = []
+        for section in sections:
+            cards = section.get("cards") if isinstance(section, dict) else None
+            slot = None
+            if isinstance(cards, list):
+                for card in cards:
+                    if isinstance(card, dict) and card.get(SLOT_KEY) in replacements \
+                            and SLOTS.get(card.get(SLOT_KEY)) == view.get("path"):
+                        slot = card.get(SLOT_KEY)
+                        break
+            if slot is None:
+                new_sections.append(section)
+                continue
+            new_sections.extend(replacements[slot])
+            rest = [c for c in cards
+                    if not (isinstance(c, dict) and c.get(SLOT_KEY) == slot)]
+            if rest:
+                new_sections.append({**section, "cards": rest})
+        view["sections"] = new_sections
+
+
+def _strip_slot_marks(obj):
+    """Odstraň značky `acond_slot` ze struktury (rekurzivně, na místě)."""
+    if isinstance(obj, dict):
+        obj.pop(SLOT_KEY, None)
+        for v in obj.values():
+            _strip_slot_marks(v)
+    elif isinstance(obj, list):
+        for v in obj:
+            _strip_slot_marks(v)
+
+
 def _to_plain(obj):
     """Převeď strukturu z HA YAML loaderu na čisté Python typy.
 
@@ -227,6 +323,7 @@ async def _compose_dashboard(
         config["views"] = views
 
     # Přilep okna add-onů na konec (každý add-on: příspěvek, nebo teaser).
+    replacements: dict[str, list[dict]] = {}
     for addon in ADDONS:
         try:
             views.extend(await _addon_views(hass, addon))
@@ -236,6 +333,23 @@ async def _compose_dashboard(
                 addon.get("title", addon.get("key", "?")),
                 err,
             )
+        try:
+            for slot, sections in (await _addon_slots(hass, addon)).items():
+                replacements.setdefault(slot, sections)
+        except Exception as err:
+            _LOGGER.warning(
+                "Acond: vsuvky add-onu '%s' selhaly (%s) – vynechány",
+                addon.get("title", addon.get("key", "?")),
+                err,
+            )
+
+    # Vsuvky do oken Acondu; pak vždy uklidit značky.
+    try:
+        if replacements:
+            _apply_slots(views, replacements)
+    except Exception as err:
+        _LOGGER.warning("Acond: vložení vsuvek selhalo (%s) – okna beze změny", err)
+    _strip_slot_marks(config)
 
     try:
         await hass.async_add_executor_job(_write_yaml, generated_path, config)
