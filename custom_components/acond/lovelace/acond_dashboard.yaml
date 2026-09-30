@@ -8,6 +8,8 @@
 #    Entity; Grafy, Diagnostika, Aplikace Acond a Nápověda podokna okna
 #    Servis. Podokna nejsou v liště, otevírají se tlačítkem a mají šipku
 #    zpět. Adresy oken (path) se NEMĚNÍ – záložky a odkazy fungují dál.
+#  - Rozcestníky a podokna mají navigační řádek jako MaR (● = otevřené
+#    podokno).
 #  - Karta „Režim TČ & Stav“ v Pohledu nese značku `acond_slot`. Když
 #    doplněk MaR dodá vsuvku, skladač kartu nahradí Schématem; bez MaR
 #    zůstává Pohled beze změny. Značku skladač z výsledku odstraní.
@@ -397,36 +399,27 @@ views:
       - type: grid
         column_span: 4
         cards:
-          - type: markdown
-            content: "#### Hodnoty a nastavení tepelného čerpadla"
-          - type: grid
-            columns: 3
-            square: false
+          # Navigační řádek (jako v MaR): ● = otevřené podokno
+          - type: horizontal-stack
             cards:
-          - type: button
-            name: Přehled
-            icon: mdi:home-thermometer
-            icon_height: 48px
-            show_state: false
-            tap_action:
-              action: navigate
-              navigation_path: /acond-dashboard/prehled
-          - type: button
-            name: Ovládání
-            icon: mdi:tune
-            icon_height: 48px
-            show_state: false
-            tap_action:
-              action: navigate
-              navigation_path: /acond-dashboard/ovladani
-          - type: button
-            name: Energie
-            icon: mdi:lightning-bolt
-            icon_height: 48px
-            show_state: false
-            tap_action:
-              action: navigate
-              navigation_path: /acond-dashboard/energie
+              - type: button
+                name: Přehled
+                icon: mdi:home-thermometer
+                tap_action:
+                  action: navigate
+                  navigation_path: /acond-dashboard/prehled
+              - type: button
+                name: Ovládání
+                icon: mdi:tune
+                tap_action:
+                  action: navigate
+                  navigation_path: /acond-dashboard/ovladani
+              - type: button
+                name: Energie
+                icon: mdi:lightning-bolt
+                tap_action:
+                  action: navigate
+                  navigation_path: /acond-dashboard/energie
 
 
   - title: Přehled
@@ -436,6 +429,27 @@ views:
     back_path: /acond-dashboard/entity
 
     cards:
+      # Navigační řádek (jako v MaR): ● = otevřené podokno
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: ● Přehled
+            icon: mdi:home-thermometer
+            tap_action:
+              action: none
+          - type: button
+            name: Ovládání
+            icon: mdi:tune
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/ovladani
+          - type: button
+            name: Energie
+            icon: mdi:lightning-bolt
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/energie
+
       - type: glance
         title: Stav tepelného čerpadla
         columns: 3
@@ -564,6 +578,27 @@ views:
     back_path: /acond-dashboard/entity
 
     cards:
+      # Navigační řádek (jako v MaR): ● = otevřené podokno
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Přehled
+            icon: mdi:home-thermometer
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/prehled
+          - type: button
+            name: ● Ovládání
+            icon: mdi:tune
+            tap_action:
+              action: none
+          - type: button
+            name: Energie
+            icon: mdi:lightning-bolt
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/energie
+
       - type: entities
         title: Režim TČ
         state_color: true
@@ -823,6 +858,27 @@ views:
     back_path: /acond-dashboard/entity
 
     cards:
+      # Navigační řádek (jako v MaR): ● = otevřené podokno
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Přehled
+            icon: mdi:home-thermometer
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/prehled
+          - type: button
+            name: Ovládání
+            icon: mdi:tune
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/ovladani
+          - type: button
+            name: ● Energie
+            icon: mdi:lightning-bolt
+            tap_action:
+              action: none
+
       - type: glance
         title: Aktuální výkon a účinnost
         columns: 2
@@ -903,44 +959,33 @@ views:
       - type: grid
         column_span: 4
         cards:
-          - type: markdown
-            content: "#### Grafy, diagnostika a nápověda"
-          - type: grid
-            columns: 4
-            square: false
+          # Navigační řádek (jako v MaR): ● = otevřené podokno
+          - type: horizontal-stack
             cards:
-          - type: button
-            name: Grafy
-            icon: mdi:chart-line
-            icon_height: 48px
-            show_state: false
-            tap_action:
-              action: navigate
-              navigation_path: /acond-dashboard/grafy
-          - type: button
-            name: Diagnostika
-            icon: mdi:wrench
-            icon_height: 48px
-            show_state: false
-            tap_action:
-              action: navigate
-              navigation_path: /acond-dashboard/diagnostika
-          - type: button
-            name: Aplikace Acond
-            icon: mdi:web
-            icon_height: 48px
-            show_state: false
-            tap_action:
-              action: navigate
-              navigation_path: /acond-dashboard/aplikace-acond
-          - type: button
-            name: Nápověda
-            icon: mdi:help-circle
-            icon_height: 48px
-            show_state: false
-            tap_action:
-              action: navigate
-              navigation_path: /acond-dashboard/napoveda
+              - type: button
+                name: Grafy
+                icon: mdi:chart-line
+                tap_action:
+                  action: navigate
+                  navigation_path: /acond-dashboard/grafy
+              - type: button
+                name: Diagnostika
+                icon: mdi:wrench
+                tap_action:
+                  action: navigate
+                  navigation_path: /acond-dashboard/diagnostika
+              - type: button
+                name: Aplikace Acond
+                icon: mdi:web
+                tap_action:
+                  action: navigate
+                  navigation_path: /acond-dashboard/aplikace-acond
+              - type: button
+                name: Nápověda
+                icon: mdi:help-circle
+                tap_action:
+                  action: navigate
+                  navigation_path: /acond-dashboard/napoveda
 
 
   # =========================================================================
@@ -953,6 +998,33 @@ views:
     back_path: /acond-dashboard/servis
 
     cards:
+      # Navigační řádek (jako v MaR): ● = otevřené podokno
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: ● Grafy
+            icon: mdi:chart-line
+            tap_action:
+              action: none
+          - type: button
+            name: Diagnostika
+            icon: mdi:wrench
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/diagnostika
+          - type: button
+            name: Aplikace Acond
+            icon: mdi:web
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/aplikace-acond
+          - type: button
+            name: Nápověda
+            icon: mdi:help-circle
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/napoveda
+
       - type: markdown
         content: >
           **7denní statistiky** používají Long-Term Statistics z HA recorderu
@@ -1050,6 +1122,33 @@ views:
     back_path: /acond-dashboard/servis
 
     cards:
+      # Navigační řádek (jako v MaR): ● = otevřené podokno
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Grafy
+            icon: mdi:chart-line
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/grafy
+          - type: button
+            name: ● Diagnostika
+            icon: mdi:wrench
+            tap_action:
+              action: none
+          - type: button
+            name: Aplikace Acond
+            icon: mdi:web
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/aplikace-acond
+          - type: button
+            name: Nápověda
+            icon: mdi:help-circle
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/napoveda
+
       # ---------- AI kontext export – nahoře, ať je vidět ----------
       - type: entities
         title: 🤖 Export AI kontextu pro Claude / ChatGPT
@@ -1249,6 +1348,33 @@ views:
     back_path: /acond-dashboard/servis
 
     cards:
+      # Navigační řádek (jako v MaR): ● = otevřené podokno
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Grafy
+            icon: mdi:chart-line
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/grafy
+          - type: button
+            name: Diagnostika
+            icon: mdi:wrench
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/diagnostika
+          - type: button
+            name: ● Aplikace Acond
+            icon: mdi:web
+            tap_action:
+              action: none
+          - type: button
+            name: Nápověda
+            icon: mdi:help-circle
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/napoveda
+
       - type: markdown
         content: |
           ## 🌐 Aplikace Acond
@@ -1283,6 +1409,33 @@ views:
     back_path: /acond-dashboard/servis
 
     cards:
+      # Navigační řádek (jako v MaR): ● = otevřené podokno
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Grafy
+            icon: mdi:chart-line
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/grafy
+          - type: button
+            name: Diagnostika
+            icon: mdi:wrench
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/diagnostika
+          - type: button
+            name: Aplikace Acond
+            icon: mdi:web
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/aplikace-acond
+          - type: button
+            name: ● Nápověda
+            icon: mdi:help-circle
+            tap_action:
+              action: none
+
       - type: markdown
         title: O integraci
         content: |
