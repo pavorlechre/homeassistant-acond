@@ -8,6 +8,28 @@ a projekt dodržuje [sémantické verzování](https://semver.org/spec/v2.0.0.ht
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Nevydáno / Unreleased]
+
+### Přidáno / Added
+
+🇨🇿 **Česky**
+
+- **Skládací dashboard.** Dashboard Acond TČ se při startu skládá ze základu a z oken doplňků. Když je nainstalovaný doplněk Acond Regulator (MaR), jeho okna se přidají na konec; když není, zobrazí se na konci okno s odkazem na něj. Složený výsledek je v `acond_dashboard.generated.yaml`, základ `acond_dashboard.yaml` se jen čte. Změny se projeví po **restartu HA**, ne po reloadu integrace.
+
+🇬🇧 **English**
+
+- **Composable dashboard.** At startup the Acond TČ dashboard is assembled from the base file and add-on views. With Acond Regulator (MaR) installed, its views are appended at the end; without it, a final view links to it. The result is written to `acond_dashboard.generated.yaml`; the base `acond_dashboard.yaml` is only read. Changes take effect after an **HA restart**, not an integration reload.
+
+### Opraveno / Fixed
+
+🇨🇿 **Česky**
+
+- Tlačítka exportu AI kontextu v okně Diagnostika používají novou syntaxi `perform-action`.
+
+🇬🇧 **English**
+
+- AI context export buttons in the Diagnostika view use the current `perform-action` syntax.
+
 ## [0.2.0] - 2026-06-01
 
 Velký funkční update – Options flow, opravy tlačítek a několik bugfixů v jádře.

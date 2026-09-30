@@ -941,16 +941,16 @@ views:
             name: Jen acond entity (rychlé, malý soubor)
             icon: mdi:robot-outline
             tap_action:
-              action: call-service
-              service: button.press
+              action: perform-action
+              perform_action: button.press
               target:
                 entity_id: button.acond_ai_context_acond
           - entity: button.acond_ai_context_full
             name: Celé HA (velký soubor – pozor na secrets!)
             icon: mdi:robot
             tap_action:
-              action: call-service
-              service: button.press
+              action: perform-action
+              perform_action: button.press
               target:
                 entity_id: button.acond_ai_context_full
               confirmation:

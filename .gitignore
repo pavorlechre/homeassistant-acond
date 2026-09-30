@@ -249,3 +249,7 @@ home-assistant_v2.db
 
 # Soubory s logem
 *.log
+
+# Runtime artefakty Acond integrace
+custom_components/acond/lovelace/acond_dashboard.generated.yaml
+acond_ai_context/
