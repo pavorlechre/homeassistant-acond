@@ -8,6 +8,8 @@
 #    obsah Grafů (adresa /grafy). Samostatné rozcestníky zrušeny, adresy
 #    /entity a /servis zanikly (existovaly jen od 30. 9.). Šipka zpět
 #    z podoken vede na /prehled, resp. /grafy.
+#  - Nápověda: opravena tabulka hodnot (Ekvitermní, Pouze bivalence);
+#    atributy raw_value, runtime a time integrace nově skutečně dodává.
 #
 # Změny oproti v0.26:
 #  - Nová struktura lišty: Pohled → Entity → Servis (+ okno doplňku MaR
@@ -1566,9 +1568,9 @@ views:
 
           ### 1. Textové senzory – používej raw_value
 
-          Senzory jako **Režim TČ** nebo **Typ regulace** zobrazují text, ale pro
-          automatizace je spolehlivější číselný atribut `raw_value` – ten se nemění
-          při přejmenování.
+          Senzory jako **Režim TČ**, **Typ regulace** nebo **popis chyby** (TČ i
+          driveru) zobrazují text, ale pro automatizace je spolehlivější číselný
+          atribut `raw_value` – ten se nemění při přejmenování (od verze 0.3.0).
 
           ```yaml
           # Správně – stabilní číselná hodnota
@@ -1579,13 +1581,13 @@ views:
 
           # Hodnoty pro Typ regulace:
           # 0 = AcondTherm
-          # 1 = Equiterm
+          # 1 = Ekvitermní
           # 2 = Standard
 
           # Hodnoty pro Režim TČ (sensor.acond_30014_hp_mode):
           # 0 = Automatický
           # 1 = Pouze TČ
-          # 3 = Pouze aux. topení
+          # 3 = Pouze bivalence
           # 4 = Vypnuto
           # 5 = Manuální
           # 6 = Chlazení
@@ -1593,7 +1595,8 @@ views:
 
           ### 2. Hodiny provozu – používej atribut runtime
 
-          Každý hodinový senzor má atribut `runtime` kombinující hodiny a minuty:
+          Každý hodinový senzor má atribut `runtime` kombinující hodiny a minuty
+          (od verze 0.3.0):
 
           ```yaml
           # Zobrazení v šabloně
@@ -1610,7 +1613,7 @@ views:
           ### 3. Tichý provoz – čas v minutách od půlnoci
 
           Senzory 30033 a 30034 vrací minuty od půlnoci. Atribut `time` obsahuje
-          čitelný formát:
+          čitelný formát (od verze 0.3.0):
 
           ```yaml
           # Čitelný čas

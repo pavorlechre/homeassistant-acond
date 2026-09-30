@@ -24,6 +24,12 @@ _LOGGER = logging.getLogger(__name__)
 # Klíče jejichž jednotka závisí na sérii TČ (PRO = W, Standard = rpm)
 _SERIES_UNIT_KEYS = {"comp_rpm_max", "comp_rpm_actual"}
 
+# Senzory, jejichž stav je text z překladového slovníku → atribut raw_value
+_TEXT_KEYS = {"err_number", "err_number_driver", "hp_mode", "regulation_type", "thermal_power"}
+
+# Senzory v minutách od půlnoci → atribut time („06:30“)
+_TIME_KEYS = {"silent_mode_start", "silent_mode_stop"}
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -109,8 +115,38 @@ class AcondSensor(CoordinatorEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self) -> dict:
-        """Přidej registr jako atribut – usnadní ladění."""
-        return {"modbus_register": self._sensor_def.address}
+        """Registr + atributy, které slibuje Nápověda v dashboardu.
+
+        - `raw_value` – surové číslo u textových senzorů (režim, regulace,
+          chyby, třída výkonu); nemění se s překladem textu.
+        - `runtime`   – u hodinových senzorů čitelně „1234 h 27 min“
+          (minuty z doprovodného registru `*_min`).
+        - `time`      – u tichého provozu čas „06:30“ z minut od půlnoci.
+        """
+        attrs: dict = {"modbus_register": self._sensor_def.address}
+        data = self.coordinator.data
+        if not data:
+            return attrs
+        key = self._sensor_def.key
+        value = data.get(key)
+        if value is None:
+            return attrs
+        try:
+            if key in _TEXT_KEYS:
+                attrs["raw_value"] = int(value)
+            elif key.endswith("_hours"):
+                hours = int(value)
+                minutes = data.get(key[: -len("_hours")] + "_min")
+                attrs["runtime"] = (
+                    f"{hours} h {int(minutes)} min" if minutes is not None
+                    else f"{hours} h"
+                )
+            elif key in _TIME_KEYS:
+                total = int(value)
+                attrs["time"] = f"{(total // 60) % 24:02d}:{total % 60:02d}"
+        except (TypeError, ValueError):
+            pass
+        return attrs
 
     @property
     def native_value(self):
