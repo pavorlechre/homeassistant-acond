@@ -1,5 +1,6 @@
 from __future__ import annotations
 import logging
+import time
 from datetime import timedelta
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
@@ -23,6 +24,11 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = ["sensor", "binary_sensor", "number", "switch", "select", "button"]
 
+# Opakování probe, když TČ při startu neodpovídalo (v0.3.0): 1 min, 2, 4, …
+# až po strop 30 min. Po úspěchu už nikdy (probe je ~60 čtení).
+PROBE_RETRY_FIRST = 60
+PROBE_RETRY_MAX = 30 * 60
+
 
 async def _probe_registers(client: AcondModbusClient) -> list[str]:
     """Zjisti které registry Acond podporuje. Vrátí seznam klíčů.
@@ -31,6 +37,10 @@ async def _probe_registers(client: AcondModbusClient) -> list[str]:
     jako DEBUG aby byl log čistý.
     """
     supported = []
+    # Nedostupné TČ: nezkoušet 60× připojení, rovnou vrátit prázdný seznam.
+    if not await client.ensure_connected():
+        _LOGGER.warning("Acond probe: TČ neodpovídá – probe zopakuji později")
+        return supported
     for sensor in SENSOR_DEFINITIONS:
         count = 2 if sensor.dint else 1
         result = await client.read_input_registers(sensor.address, count=count)
@@ -70,8 +80,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if not connected:
         _LOGGER.error("Acond: nelze se připojit na %s", host)
 
-    # Probe – zjisti které registry TČ podporuje
+    # Probe – zjisti které registry TČ podporuje. Seznam se při neúspěchu
+    # doplňuje NA MÍSTĚ (stejný objekt je v hass.data), viz async_update_data.
     supported_keys = await _probe_registers(client)
+    probe_state = {"next": time.monotonic() + PROBE_RETRY_FIRST, "delay": PROBE_RETRY_FIRST}
 
     # Forward declaration coordinatoru, aby ho async_update_data viděl
     # přes closure. Skutečně se naplní pár řádků níže.
@@ -109,6 +121,25 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             data = {}
 
         successful_reads = 0
+
+        # TČ nedostupné → jeden pokus o připojení místo ~60 (klient loguje sám).
+        if not await client.ensure_connected():
+            raise UpdateFailed("Acond: TČ neodpovídá")
+
+        # Probe při startu nic nenašel (TČ bylo vypnuté) → zopakovat s odstupem.
+        # Bez toho by integrace navždy četla jen holding registry a tvářila se
+        # zdravě (chyba 5.1 z předávky).
+        if not supported_keys:
+            now = time.monotonic()
+            if now >= probe_state["next"]:
+                supported_keys.extend(await _probe_registers(client))
+                probe_state["delay"] = min(probe_state["delay"] * 2, PROBE_RETRY_MAX)
+                probe_state["next"] = now + probe_state["delay"]
+            if not supported_keys:
+                raise UpdateFailed(
+                    "Acond: registry TČ zatím nezjištěny – probe zopakuji "
+                    f"za {int(probe_state['next'] - now)} s"
+                )
 
         # --- Fáze 1: input registry (30xxx) ---
         for sensor in SENSOR_DEFINITIONS:

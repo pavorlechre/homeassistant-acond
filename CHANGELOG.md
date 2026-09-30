@@ -15,19 +15,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 🇨🇿 **Česky**
 
 - **Skládací dashboard.** Dashboard Acond TČ se při startu skládá ze základu a z oken doplňků. Když je nainstalovaný doplněk Acond Regulator (MaR), jeho okna se přidají na konec; když není, zobrazí se na konci okno s odkazem na něj. Složený výsledek je v `acond_dashboard.generated.yaml`, základ `acond_dashboard.yaml` se jen čte. Změny se projeví po **restartu HA**, ne po reloadu integrace.
+- **Nová lišta dashboardu: Pohled, Entity, Servis.** Přehled, Ovládání a Energie jsou podokna okna Entity; Grafy, Diagnostika, Aplikace Acond a Nápověda podokna okna Servis (otevírají se tlačítkem, šipka zpět vlevo nahoře). Adresy oken se nemění, záložky fungují dál.
+- **Vsuvka doplňku do Pohledu.** S nainstalovaným MaR se karta „Režim TČ & Stav“ nahradí schématem soustavy; tlačítka režimů zůstávají. Bez MaR je Pohled beze změny a v liště je okno MaR s odkazem.
 
 🇬🇧 **English**
 
 - **Composable dashboard.** At startup the Acond TČ dashboard is assembled from the base file and add-on views. With Acond Regulator (MaR) installed, its views are appended at the end; without it, a final view links to it. The result is written to `acond_dashboard.generated.yaml`; the base `acond_dashboard.yaml` is only read. Changes take effect after an **HA restart**, not an integration reload.
+- **New dashboard bar: Pohled, Entity, Servis.** Přehled, Ovládání and Energie are subviews of Entity; Grafy, Diagnostika, Aplikace Acond and Nápověda subviews of Servis (opened by buttons, back arrow top left). View URLs are unchanged, bookmarks keep working.
+- **Add-on insert into Pohled.** With MaR installed, the "Režim TČ & Stav" card is replaced by the system schematic; mode buttons stay. Without MaR, Pohled is unchanged and a MaR view with a link sits in the bar.
 
 ### Opraveno / Fixed
 
 🇨🇿 **Česky**
 
+- **Integrace se sama vzpamatuje, když bylo TČ při startu HA vypnuté.** Zjištění registrů (probe) se opakuje s rostoucím odstupem (1 min → max. 30 min), dokud neuspěje. Dřív zůstala integrace bez hodnot až do ručního reloadu.
+- **Tišší log při výpadku TČ.** První neúspěšné připojení se zapíše jako chyba, další pokusy jen do ladicího logu a obnovení spojení jako informace. Při výpadku se už nepokouší o ~60 připojení každých 15 s.
 - Tlačítka exportu AI kontextu v okně Diagnostika používají novou syntaxi `perform-action`.
 
 🇬🇧 **English**
 
+- **The integration recovers on its own when the heat pump was off at HA startup.** Register probing is retried with growing backoff (1 min → max 30 min) until it succeeds. Previously it stayed empty until a manual reload.
+- **Quieter log during heat pump outages.** The first failed connection is logged as an error, further attempts at debug level, and recovery as info. No more ~60 connection attempts every 15 s during an outage.
 - AI context export buttons in the Diagnostika view use the current `perform-action` syntax.
 
 ## [0.2.0] - 2026-06-01

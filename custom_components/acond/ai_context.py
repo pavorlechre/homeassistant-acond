@@ -1319,9 +1319,10 @@ def _async_send_notification(
 ) -> None:
     """Pošle persistent_notification s odkazem na stažení exportu.
 
-    HTTP view AcondAIContextDownloadView je registrovaná v __init__.py
-    a vrací soubor s `Content-Disposition: attachment`, takže kliknutí
-    nabídne stažení (ne zobrazení v prohlížeči).
+    Soubor leží v /config/www/acond_ai_context/ a stahuje se jako statický
+    asset přes /local/acond_ai_context/<filename>. Žádná HTTP view se
+    neregistruje (dřívější AcondAIContextDownloadView byla zrušena, odkaz
+    přes /api/... nefungoval spolehlivě v mobilní aplikaci).
     """
     from homeassistant.components import persistent_notification
 

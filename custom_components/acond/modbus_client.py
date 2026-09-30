@@ -7,25 +7,60 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class AcondModbusClient:
-    """Persistent Modbus client for Acond heat pump."""
+    """Persistent Modbus client for Acond heat pump.
+
+    Logování výpadku (v0.3.0): při nedostupném TČ se nestěžujeme každých
+    15 s. První neúspěšné připojení = ERROR s kontextem, další pokusy během
+    téhož výpadku = DEBUG, obnovení spojení = INFO (s počtem pokusů).
+    Jinak se log HA zahltí a ai_context ztratí užitečné řádky.
+    """
 
     def __init__(self, host: str):
         self._host = host
         self._port = 502
         self._client = AsyncModbusTcpClient(self._host, port=self._port)
+        self._outage = False        # probíhá výpadek (už nahlášený)?
+        self._failed_attempts = 0   # neúspěšné pokusy v tomto výpadku
+
+    def _report_failure(self, detail: str) -> None:
+        self._failed_attempts += 1
+        if not self._outage:
+            self._outage = True
+            _LOGGER.error(
+                "AcondModbusClient: TČ %s:%s nedostupné (%s). Zkouším dál "
+                "potichu, obnovení spojení ohlásím.",
+                self._host, self._port, detail,
+            )
+        else:
+            _LOGGER.debug(
+                "AcondModbusClient: pokus %s o připojení selhal (%s)",
+                self._failed_attempts, detail,
+            )
 
     async def connect(self) -> bool:
         """Connect to Acond. Call once at integration startup."""
         try:
             await self._client.connect()
-            if self._client.connected:
-                _LOGGER.info("AcondModbusClient: connected to %s:%s", self._host, self._port)
-                return True
-            _LOGGER.error("AcondModbusClient: connection failed")
-            return False
         except Exception as err:
-            _LOGGER.error("AcondModbusClient: connect exception: %s", err)
+            self._report_failure(f"výjimka: {err}")
             return False
+        if not self._client.connected:
+            self._report_failure("spojení se nenavázalo")
+            return False
+        if self._outage:
+            _LOGGER.info(
+                "AcondModbusClient: spojení s %s:%s obnoveno (po %s neúspěšných pokusech)",
+                self._host, self._port, self._failed_attempts,
+            )
+        else:
+            _LOGGER.info("AcondModbusClient: connected to %s:%s", self._host, self._port)
+        self._outage = False
+        self._failed_attempts = 0
+        return True
+
+    async def ensure_connected(self) -> bool:
+        """Veřejná varianta pro coordinator a probe: je TČ dosažitelné?"""
+        return await self._ensure_connected()
 
     async def disconnect(self) -> None:
         """Disconnect. Call on integration unload."""
@@ -36,7 +71,8 @@ class AcondModbusClient:
         """Reconnect if connection was lost."""
         if self._client.connected:
             return True
-        _LOGGER.warning("AcondModbusClient: connection lost, reconnecting...")
+        if not self._outage:
+            _LOGGER.warning("AcondModbusClient: spojení ztraceno, připojuji znovu")
         return await self.connect()
 
     async def read_input_registers(self, address: int, count: int = 1):
