@@ -1,6 +1,13 @@
 ###############################################################################
 # Acond Heat Pump – Lovelace dashboard
-# v0.27 (30.9.2026)
+# v0.28 (30.9.2026)
+#
+# Změny oproti v0.27:
+#  - Okna Entity a Servis ukazují obsah hned po otevření (jako okno
+#    Statistika v MaR): Entity = obsah Přehledu (adresa /prehled), Servis =
+#    obsah Grafů (adresa /grafy). Samostatné rozcestníky zrušeny, adresy
+#    /entity a /servis zanikly (existovaly jen od 30. 9.). Šipka zpět
+#    z podoken vede na /prehled, resp. /grafy.
 #
 # Změny oproti v0.26:
 #  - Nová struktura lišty: Pohled → Entity → Servis (+ okno doplňku MaR
@@ -40,8 +47,8 @@
 #  - "Nápověda" – přidána sekce "Přizpůsobení dashboardu"
 #
 # Pořadí v liště: Pohled → Entity → Servis (→ okna doplňků)
-#   Entity: podokna Přehled, Ovládání, Energie
-#   Servis: podokna Grafy, Diagnostika, Aplikace Acond, Nápověda
+#   Entity (/prehled) = Přehled; podokna Ovládání, Energie
+#   Servis (/grafy)   = Grafy; podokna Diagnostika, Aplikace Acond, Nápověda
 #
 # Konvence entity_id:
 #   sensor.acond_{address}_{key}
@@ -388,45 +395,12 @@ views:
               - sensor.acond_30010_t_act_air
 
   # =========================================================================
-  # ENTITY – rozcestník (podokna jsou mimo lištu, mají šipku zpět)
+  # ENTITY – v liště; obsah Přehledu (adresa /prehled), podokna Ovládání a
+  # Energie jsou mimo lištu se šipkou zpět sem
   # =========================================================================
   - title: Entity
-    path: entity
-    icon: mdi:format-list-bulleted-square
-    type: sections
-    max_columns: 4
-    sections:
-      - type: grid
-        column_span: 4
-        cards:
-          # Navigační řádek (jako v MaR): ● = otevřené podokno
-          - type: horizontal-stack
-            cards:
-              - type: button
-                name: Přehled
-                icon: mdi:home-thermometer
-                tap_action:
-                  action: navigate
-                  navigation_path: /acond-dashboard/prehled
-              - type: button
-                name: Ovládání
-                icon: mdi:tune
-                tap_action:
-                  action: navigate
-                  navigation_path: /acond-dashboard/ovladani
-              - type: button
-                name: Energie
-                icon: mdi:lightning-bolt
-                tap_action:
-                  action: navigate
-                  navigation_path: /acond-dashboard/energie
-
-
-  - title: Přehled
     path: prehled
-    icon: mdi:home-thermometer
-    subview: true
-    back_path: /acond-dashboard/entity
+    icon: mdi:format-list-bulleted-square
 
     cards:
       # Navigační řádek (jako v MaR): ● = otevřené podokno
@@ -575,7 +549,7 @@ views:
     path: ovladani
     icon: mdi:tune
     subview: true
-    back_path: /acond-dashboard/entity
+    back_path: /acond-dashboard/prehled
 
     cards:
       # Navigační řádek (jako v MaR): ● = otevřené podokno
@@ -855,7 +829,7 @@ views:
     path: energie
     icon: mdi:lightning-bolt
     subview: true
-    back_path: /acond-dashboard/entity
+    back_path: /acond-dashboard/prehled
 
     cards:
       # Navigační řádek (jako v MaR): ● = otevřené podokno
@@ -948,54 +922,12 @@ views:
           - sensor.acond_30029_cop
 
   # =========================================================================
-  # SERVIS – rozcestník (podokna jsou mimo lištu, mají šipku zpět)
+  # SERVIS – v liště; obsah Grafů (adresa /grafy), dlouhodobé statistiky
+  # (built-in statistics-graph + history-graph); podokna mají šipku zpět sem
   # =========================================================================
   - title: Servis
-    path: servis
-    icon: mdi:tools
-    type: sections
-    max_columns: 4
-    sections:
-      - type: grid
-        column_span: 4
-        cards:
-          # Navigační řádek (jako v MaR): ● = otevřené podokno
-          - type: horizontal-stack
-            cards:
-              - type: button
-                name: Grafy
-                icon: mdi:chart-line
-                tap_action:
-                  action: navigate
-                  navigation_path: /acond-dashboard/grafy
-              - type: button
-                name: Diagnostika
-                icon: mdi:wrench
-                tap_action:
-                  action: navigate
-                  navigation_path: /acond-dashboard/diagnostika
-              - type: button
-                name: Aplikace Acond
-                icon: mdi:web
-                tap_action:
-                  action: navigate
-                  navigation_path: /acond-dashboard/aplikace-acond
-              - type: button
-                name: Nápověda
-                icon: mdi:help-circle
-                tap_action:
-                  action: navigate
-                  navigation_path: /acond-dashboard/napoveda
-
-
-  # =========================================================================
-  # 5. GRAFY – dlouhodobé statistiky (built-in statistics-graph + history-graph)
-  # =========================================================================
-  - title: Grafy
     path: grafy
-    icon: mdi:chart-line
-    subview: true
-    back_path: /acond-dashboard/servis
+    icon: mdi:tools
 
     cards:
       # Navigační řádek (jako v MaR): ● = otevřené podokno
@@ -1119,7 +1051,7 @@ views:
     path: diagnostika
     icon: mdi:wrench
     subview: true
-    back_path: /acond-dashboard/servis
+    back_path: /acond-dashboard/grafy
 
     cards:
       # Navigační řádek (jako v MaR): ● = otevřené podokno
@@ -1345,7 +1277,7 @@ views:
     path: aplikace-acond
     icon: mdi:web
     subview: true
-    back_path: /acond-dashboard/servis
+    back_path: /acond-dashboard/grafy
 
     cards:
       # Navigační řádek (jako v MaR): ● = otevřené podokno
@@ -1406,7 +1338,7 @@ views:
     path: napoveda
     icon: mdi:help-circle
     subview: true
-    back_path: /acond-dashboard/servis
+    back_path: /acond-dashboard/grafy
 
     cards:
       # Navigační řádek (jako v MaR): ● = otevřené podokno
