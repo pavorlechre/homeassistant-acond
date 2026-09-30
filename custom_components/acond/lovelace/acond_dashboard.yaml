@@ -1,6 +1,16 @@
 ###############################################################################
 # Acond Heat Pump – Lovelace dashboard
-# v0.26 (1.6.2026)
+# v0.27 (30.9.2026)
+#
+# Změny oproti v0.26:
+#  - Nová struktura lišty: Pohled → Entity → Servis (+ okno doplňku MaR
+#    přidané skladačem). Přehled, Ovládání a Energie jsou podokna okna
+#    Entity; Grafy, Diagnostika, Aplikace Acond a Nápověda podokna okna
+#    Servis. Podokna nejsou v liště, otevírají se tlačítkem a mají šipku
+#    zpět. Adresy oken (path) se NEMĚNÍ – záložky a odkazy fungují dál.
+#  - Karta „Režim TČ & Stav“ v Pohledu nese značku `acond_slot`. Když
+#    doplněk MaR dodá vsuvku, skladač kartu nahradí Schématem; bez MaR
+#    zůstává Pohled beze změny. Značku skladač z výsledku odstraní.
 #
 # Změny oproti v0.25:
 #  - Pohled view: NOVÁ podmíněná sekce pod "Režim TČ" pro aktivní chybu
@@ -27,8 +37,9 @@
 #  - "Aplikace Acond" – iframe zrušen, jen tlačítko v novém okně
 #  - "Nápověda" – přidána sekce "Přizpůsobení dashboardu"
 #
-# Pořadí views: Pohled → Přehled → Ovládání → Energie → Grafy →
-#               Diagnostika → Aplikace Acond → Nápověda
+# Pořadí v liště: Pohled → Entity → Servis (→ okna doplňků)
+#   Entity: podokna Přehled, Ovládání, Energie
+#   Servis: podokna Grafy, Diagnostika, Aplikace Acond, Nápověda
 #
 # Konvence entity_id:
 #   sensor.acond_{address}_{key}
@@ -63,7 +74,10 @@ views:
         column_span: 4
         cards:
           # --- Heading 2 řádky: literal block scalar (zachovává newlines) ---
+          # acond_slot: místo, které smí nahradit doplněk (MaR → Schéma).
+          # Skladač značku z generovaného dashboardu odstraní.
           - type: markdown
+            acond_slot: pohled_stav
             content: |
               #### 🎲 Režim TČ & 🔧 Stav
 
@@ -371,9 +385,55 @@ views:
               - sensor.acond_30018_t_act_water_outlet
               - sensor.acond_30010_t_act_air
 
+  # =========================================================================
+  # ENTITY – rozcestník (podokna jsou mimo lištu, mají šipku zpět)
+  # =========================================================================
+  - title: Entity
+    path: entity
+    icon: mdi:format-list-bulleted-square
+    type: sections
+    max_columns: 4
+    sections:
+      - type: grid
+        column_span: 4
+        cards:
+          - type: markdown
+            content: "#### Hodnoty a nastavení tepelného čerpadla"
+          - type: grid
+            columns: 3
+            square: false
+            cards:
+          - type: button
+            name: Přehled
+            icon: mdi:home-thermometer
+            icon_height: 48px
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/prehled
+          - type: button
+            name: Ovládání
+            icon: mdi:tune
+            icon_height: 48px
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/ovladani
+          - type: button
+            name: Energie
+            icon: mdi:lightning-bolt
+            icon_height: 48px
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/energie
+
+
   - title: Přehled
     path: prehled
     icon: mdi:home-thermometer
+    subview: true
+    back_path: /acond-dashboard/entity
 
     cards:
       - type: glance
@@ -500,6 +560,8 @@ views:
   - title: Ovládání
     path: ovladani
     icon: mdi:tune
+    subview: true
+    back_path: /acond-dashboard/entity
 
     cards:
       - type: entities
@@ -757,6 +819,8 @@ views:
   - title: Energie
     path: energie
     icon: mdi:lightning-bolt
+    subview: true
+    back_path: /acond-dashboard/entity
 
     cards:
       - type: glance
@@ -828,11 +892,65 @@ views:
           - sensor.acond_30029_cop
 
   # =========================================================================
+  # SERVIS – rozcestník (podokna jsou mimo lištu, mají šipku zpět)
+  # =========================================================================
+  - title: Servis
+    path: servis
+    icon: mdi:tools
+    type: sections
+    max_columns: 4
+    sections:
+      - type: grid
+        column_span: 4
+        cards:
+          - type: markdown
+            content: "#### Grafy, diagnostika a nápověda"
+          - type: grid
+            columns: 4
+            square: false
+            cards:
+          - type: button
+            name: Grafy
+            icon: mdi:chart-line
+            icon_height: 48px
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/grafy
+          - type: button
+            name: Diagnostika
+            icon: mdi:wrench
+            icon_height: 48px
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/diagnostika
+          - type: button
+            name: Aplikace Acond
+            icon: mdi:web
+            icon_height: 48px
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/aplikace-acond
+          - type: button
+            name: Nápověda
+            icon: mdi:help-circle
+            icon_height: 48px
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /acond-dashboard/napoveda
+
+
+  # =========================================================================
   # 5. GRAFY – dlouhodobé statistiky (built-in statistics-graph + history-graph)
   # =========================================================================
   - title: Grafy
     path: grafy
     icon: mdi:chart-line
+    subview: true
+    back_path: /acond-dashboard/servis
 
     cards:
       - type: markdown
@@ -928,6 +1046,8 @@ views:
   - title: Diagnostika
     path: diagnostika
     icon: mdi:wrench
+    subview: true
+    back_path: /acond-dashboard/servis
 
     cards:
       # ---------- AI kontext export – nahoře, ať je vidět ----------
@@ -1125,6 +1245,8 @@ views:
   - title: Aplikace Acond
     path: aplikace-acond
     icon: mdi:web
+    subview: true
+    back_path: /acond-dashboard/servis
 
     cards:
       - type: markdown
@@ -1157,6 +1279,8 @@ views:
   - title: Nápověda
     path: napoveda
     icon: mdi:help-circle
+    subview: true
+    back_path: /acond-dashboard/servis
 
     cards:
       - type: markdown

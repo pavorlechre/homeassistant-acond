@@ -59,15 +59,15 @@ GENERATED_YAML_FILENAME = "acond_dashboard.generated.yaml"
 ADDONS: list[dict] = [
     {
         "key": "regulator",
-        "title": "Regulace",
+        "title": "MaR",
         "path": "regulace",
         "icon": "mdi:chart-bell-curve-cumulative",
-        # TODO: doplnit reálnou URL repozitáře MaR
         "repo_url": "https://github.com/pavorlechre/acond_regulator",
         "teaser": (
-            "Toto okno ožije po instalaci integrace **Acond Regulator (MaR)** – "
-            "ekvitermní regulace, předpovědi počasí a grafy. Bez ní Acond běží "
-            "normálně dál."
+            "**Měření a Regulaci (MaR)** pro Acond lze doplnit samostatnou "
+            "integrací **Acond Regulator** – ekvitermní regulace s předpovědí "
+            "počasí, topení z přebytků FVE, časové programy, schéma soustavy "
+            "a statistika. Bez ní Acond běží normálně dál."
         ),
         "contribution_files": [
             "custom_components/acond_regulator/dashboard/views.yaml",
