@@ -10,6 +10,8 @@
 #    z podoken vede na /prehled, resp. /grafy.
 #  - Nápověda: opravena tabulka hodnot (Ekvitermní, Pouze bivalence);
 #    atributy raw_value, runtime a time integrace nově skutečně dodává.
+#  - Pohled: banner „Aktivní chyba TČ“ jen při skutečné poruše
+#    (30007 bit 2), ne při dočasných hlášeních v 30021. Text dál z 30021.
 #
 # Změny oproti v0.26:
 #  - Nová struktura lišty: Pohled → Entity → Servis (+ okno doplňku MaR
@@ -188,9 +190,12 @@ views:
       # =====================================================================
       # 1b. Aktivní chyba TČ – sekce s vlastní visibility (HA 2024.3+)
       # =====================================================================
-      # Zobrazí se, když sensor.acond_30021_err_number má jiný stav než
-      # "OK" / "unknown" / "unavailable". Patří hned za Sekci 1 (Režim TČ),
-      # aby si uživatel chyby všiml ihned po otevření Pohled view.
+      # Zobrazí se jen při skutečné poruše: binary_sensor
+      # acond_30007_tc_status_bit_2 (Porucha TČ) = on. Text chyby dál
+      # ze sensor.acond_30021_err_number. Dřív se spínalo na 30021 ≠ OK,
+      # což ukazovalo i dočasná hlášení, která zmizí sama bez resetu.
+      # Patří hned za Sekci 1 (Režim TČ), aby si uživatel chyby všiml
+      # ihned po otevření Pohled view.
       #
       # POZOR: Pohled view je typu `sections` (oddíly). Conditional karty
       # do něj NEPATŘÍ jako samostatná položka v `sections:` – HA hlásí
@@ -199,18 +204,15 @@ views:
       # dle stavu sensoru.
       #
       # Pro testování bez reálné chyby: Dev Tools → Stavy → najít
-      # sensor.acond_30021_err_number → nastavit State na např.
-      # "A12 – High pressure" → Set state. Karta se okamžitě zobrazí;
+      # binary_sensor.acond_30007_tc_status_bit_2 → nastavit State na "on"
+      # → Set state. Karta se okamžitě zobrazí;
       # po ~15 s coordinator přepíše zpět na skutečnou hodnotu.
       - type: grid
         column_span: 4
         visibility:
           - condition: state
-            entity: sensor.acond_30021_err_number
-            state_not:
-              - "OK"
-              - "unknown"
-              - "unavailable"
+            entity: binary_sensor.acond_30007_tc_status_bit_2
+            state: "on"
         cards:
           - type: heading
             heading: 🚨 Aktivní chyba TČ
