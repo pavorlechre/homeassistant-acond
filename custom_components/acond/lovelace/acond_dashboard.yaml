@@ -12,6 +12,8 @@
 #    atributy raw_value, runtime a time integrace nově skutečně dodává.
 #  - Pohled: banner „Aktivní chyba TČ“ jen při skutečné poruše
 #    (30007 bit 2), ne při dočasných hlášeních v 30021. Text dál z 30021.
+#  - Pohled: karty v oddílech přes celou šířku mají grid_options columns:
+#    full (bez toho zabraly jen jeden sloupec).
 #
 # Změny oproti v0.26:
 #  - Nová struktura lišty: Pohled → Entity → Servis (+ okno doplňku MaR
@@ -90,6 +92,8 @@ views:
           # acond_slot: místo, které smí nahradit doplněk (MaR → Schéma).
           # Skladač značku z generovaného dashboardu odstraní.
           - type: markdown
+            grid_options:
+              columns: full
             acond_slot: pohled_stav
             content: |
               #### 🎲 Režim TČ & 🔧 Stav
@@ -106,6 +110,8 @@ views:
 
           # --- Mode toolbar: 5× button karty s velkými ikonami ---
           - type: horizontal-stack
+            grid_options:
+              columns: full
             cards:
               - type: button
                 entity: switch.acond_40006_tc_set_bit_3
@@ -388,6 +394,8 @@ views:
             heading: 📈 Teploty (24 h)
 
           - type: history-graph
+            grid_options:
+              columns: full
             hours_to_show: 24
             refresh_interval: 60
             entities:
