@@ -19,6 +19,8 @@ This integration is currently in beta (v0.2.0). It has been developed and tested
 
 This is an unofficial community integration. It is not affiliated with, endorsed by, or supported by Acond a.s. The "Acond" name and logo are used solely to identify the heat pumps this integration communicates with.
 
+**No warranty.** The integration reads from the heat pump and can also write to it (modes, setpoints, capacity). Inappropriate writes may lead to higher heating costs, under- or overheating of the building, or increased wear of the heat pump, although all of the heat pump's own protections in its control unit remain in place. Use it at your own risk; the authors accept no liability for any damage.
+
 ---
 
 ## What it does

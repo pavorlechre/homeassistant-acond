@@ -19,6 +19,8 @@ Integrace je momentálně v beta fázi (v0.2.0). Byla vyvinuta a otestována na 
 
 Toto je neoficiální komunitní integrace. Není přidružená, schválená ani podporovaná společností Acond a.s. Název "Acond" a logo jsou použity výhradně k identifikaci tepelných čerpadel, se kterými integrace komunikuje.
 
+**Bez záruky.** Integrace z tepelného čerpadla čte a umí do něj i zapisovat (režimy, žádané teploty, výkon). Nevhodný zápis může vést ke zvýšeným nákladům na vytápění, k nedotopení či přetopení objektu, případně i ke zvýšenému opotřebení čerpadla, byť všechny vlastní ochrany čerpadla v jeho řídicí jednotce zůstávají zachovány. Používáš ji na vlastní odpovědnost; autoři se zříkají odpovědnosti za případné škody.
+
 ---
 
 ## Co integrace umí
