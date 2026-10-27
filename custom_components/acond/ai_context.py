@@ -6,7 +6,9 @@ soubor vhodný pro vložení do kontextu AI asistenta (ChatGPT, Claude…).
 Dva režimy:
     - "acond"  – jen entity, automatizace, skripty, scény a pomocníci
                  související s integrací Acond (prefix entity_id acond_
-                 + tranzitivně objekty, které je referencují)
+                 + tranzitivně objekty, které je referencují). Je-li
+                 nainstalován doplněk MaR (acond_regulator), patří do
+                 rozsahu i jeho entity a objekty, které na ně odkazují.
     - "full"   – kompletní snapshot HA
 
 Výstupní soubor leží v /config/www/acond_ai_context/, stahuje se přes
@@ -47,8 +49,12 @@ _PUBLIC_URL_PREFIX = "/local/acond_ai_context"
 # Prefix pro identifikaci Acond entit
 _ACOND_PREFIX = "acond_"
 
-# Kolik řádků logu integrace připojit
-_LOG_TAIL_LINES = 30
+# Doplněk MaR (Acond Regulator). Acond na něm nezávisí: když v HA není,
+# export se chová přesně jako bez něj (žádná prázdná sekce).
+_MAR_DOMAIN = "acond_regulator"
+
+# Kolik řádků logu integrace připojit (Acond + MaR sdílí jeden buffer)
+_LOG_TAIL_LINES = 50
 
 # Kolik řádků globálního WARNING+ERROR logu připojit (větší buffer – errory
 # bývají rozptýlené v čase, potřebujeme delší retrospektivu)
@@ -173,8 +179,12 @@ def install_log_collector() -> None:
     if _log_collector is not None:
         # Defensivně odpoj starý handler (může nebo nemusí být připojený)
         acond_logger.removeHandler(_log_collector)
+        logging.getLogger(f"custom_components.{_MAR_DOMAIN}").removeHandler(_log_collector)
     _log_collector = _AcondLogCollector()
     acond_logger.addHandler(_log_collector)
+    # Stejný buffer i pro logger MaR (custom_components.acond_regulator) –
+    # jeho úroveň neměníme, je to cizí integrace.
+    logging.getLogger(f"custom_components.{_MAR_DOMAIN}").addHandler(_log_collector)
 
     # Nastav logger na INFO, pokud je výš (WARNING / ERROR / NOTSET).
     # Logger filtruje záznamy PŘED předáním handleru – bez tohoto nastavení
@@ -198,6 +208,7 @@ def uninstall_log_collector() -> None:
 
     if _log_collector is not None:
         logging.getLogger(f"custom_components.{DOMAIN}").removeHandler(_log_collector)
+        logging.getLogger(f"custom_components.{_MAR_DOMAIN}").removeHandler(_log_collector)
         _log_collector = None
 
     if _global_error_collector is not None:
@@ -219,22 +230,45 @@ async def _scan_versions(hass: HomeAssistant) -> dict:
     except ImportError:
         pymodbus_version = "not installed"
 
-    return {
+    mar_version = None
+    if hass.config_entries.async_entries(_MAR_DOMAIN):
+        try:
+            from homeassistant.loader import async_get_integration
+            mar_version = str((await async_get_integration(hass, _MAR_DOMAIN)).version)
+        except Exception:
+            mar_version = "?"
+
+    versions = {
         "home_assistant": ha_version,
         "acond_integration": VERSION,
         "pymodbus": pymodbus_version,
     }
+    if mar_version is not None:
+        versions["mar_integration"] = mar_version
+    return versions
 
 
 async def _scan_config_entries(hass: HomeAssistant) -> list[dict]:
-    """Config entries integrace acond (IP, série)."""
+    """Config entries integrace acond (IP, série) a doplňku MaR.
+
+    U MaR jen název a stav – jeho volby (poloha, odkazy na tabulky…) do
+    exportu neposíláme; nastavení MaR je v entitách, ty v exportu jsou.
+    """
     entries = []
     for entry in hass.config_entries.async_entries(DOMAIN):
         entries.append({
+            "domain": DOMAIN,
             "entry_id": entry.entry_id,
             "title": entry.title,
             "data": dict(entry.data),          # bude redigováno později
             "options": dict(entry.options),
+            "state": str(entry.state),
+        })
+    for entry in hass.config_entries.async_entries(_MAR_DOMAIN):
+        entries.append({
+            "domain": _MAR_DOMAIN,
+            "entry_id": entry.entry_id,
+            "title": entry.title,
             "state": str(entry.state),
         })
     return entries
@@ -666,11 +700,26 @@ def _collect_acond_entity_ids(entities: list[dict]) -> set[str]:
     return ids
 
 
+def _entity_id_pattern(entity_ids: set[str]) -> re.Pattern | None:
+    """Regex, který najde kterékoli z daných entity_id jako celé slovo.
+
+    Pro MaR: hledáme skutečná ID jeho entit, ne text „mar_“ – ten by chytil
+    i cizí automatizaci, která má „mar“ v názvu náhodou.
+    """
+    if not entity_ids:
+        return None
+    alternatives = "|".join(re.escape(e) for e in sorted(entity_ids, key=len, reverse=True))
+    return re.compile(r"(?<!\w)(?:" + alternatives + r")(?!\w)")
+
+
 def _filter_referencing_items(
     items: list[dict],
     must_contain: str = _ACOND_PREFIX,
+    extra_ids: re.Pattern | None = None,
 ) -> list[dict]:
-    """Vybere z listu items ty, jejichž config obsahuje must_contain."""
+    """Vybere z listu items ty, jejichž config obsahuje must_contain,
+    nebo (je-li zadán `extra_ids`) odkazuje na některou z těch entit (MaR).
+    """
     result = []
     for item in items:
         cfg = item.get("config")
@@ -678,7 +727,11 @@ def _filter_referencing_items(
         if cfg is not None and _ACOND_PREFIX in repr(cfg):
             result.append(item)
             continue
-        if must_contain in repr(item):
+        text = repr(item)
+        if must_contain in text:
+            result.append(item)
+            continue
+        if extra_ids is not None and extra_ids.search(text):
             result.append(item)
     return result
 
@@ -704,6 +757,7 @@ def _select_yaml_in_acond_scope(
     filtered_automations: list[dict],
     filtered_scripts: list[dict],
     filtered_scenes: list[dict],
+    mar_ids: re.Pattern | None = None,
 ) -> list[dict]:
     """Vybere YAML legacy entity, které patří do acond rozsahu.
 
@@ -746,6 +800,10 @@ def _select_yaml_in_acond_scope(
         # (b) odkaz Z této YAML entity NA acond (utility_meter source ap.)
         if _contains_acond_reference(ye):
             selected.append(ye)
+            continue
+        # (b') totéž pro entity MaR
+        if mar_ids is not None and mar_ids.search(repr(ye)):
+            selected.append(ye)
     return selected
 
 
@@ -753,11 +811,13 @@ def filter_acond_only(snapshot: dict) -> dict:
     """Z kompletního snapshotu vytvoří podmnožinu související s integrací Acond.
 
     Pravidla:
-    - entity: platform == 'acond' NEBO entity_id obsahuje 'acond_'
+    - entity: platform == 'acond' NEBO entity_id obsahuje 'acond_';
+      navíc všechny entity doplňku MaR (platform == 'acond_regulator')
     - YAML legacy entity (sensor: platform: rest/template, rest: blok,
       utility_meter v YAML…): zahrnuto tehdy, kdy se tranzitivně dotýká
       acond rozsahu (viz `_select_yaml_in_acond_scope`)
-    - automation/script/scene: repr(config) obsahuje 'acond_'
+    - automation/script/scene: repr(config) obsahuje 'acond_' NEBO
+      odkazuje na skutečné entity_id některé entity MaR
     - helpers: jen ty, na které odkazuje některá z filtrovaných automatizací
       (tranzitivně přes jeden krok – neřešíme helper odkazující na helper)
     - devices: jen ty, které mají alespoň jednu acond entitu
@@ -772,9 +832,30 @@ def filter_acond_only(snapshot: dict) -> dict:
     ]
     acond_entity_ids = {e["entity_id"] for e in acond_entities}
 
-    filtered_automations = _filter_referencing_items(snapshot.get("automations", []))
-    filtered_scripts = _filter_referencing_items(snapshot.get("scripts", []))
-    filtered_scenes = _filter_referencing_items(snapshot.get("scenes", []))
+    # Doplněk MaR – jen když je v HA (entity nebo config entry). Bez něj
+    # se nic nemění a v exportu není žádná prázdná sekce.
+    mar_entities = [
+        e for e in snapshot.get("entities", [])
+        if e.get("platform") == _MAR_DOMAIN and e.get("entity_id") not in acond_entity_ids
+    ]
+    mar_installed = bool(mar_entities) or any(
+        c.get("domain") == _MAR_DOMAIN for c in snapshot.get("config_entries", [])
+    )
+    mar_ids = _entity_id_pattern({e["entity_id"] for e in mar_entities})
+
+    def _pick(items: list[dict]) -> list[dict]:
+        return _filter_referencing_items(items, extra_ids=mar_ids)
+
+    filtered_automations = _pick(snapshot.get("automations", []))
+    filtered_scripts = _pick(snapshot.get("scripts", []))
+    filtered_scenes = _pick(snapshot.get("scenes", []))
+
+    def _mar_count(items: list[dict]) -> int:
+        return sum(1 for i in items if mar_ids is not None and mar_ids.search(repr(i)))
+
+    # Dál se pracuje s Acond + MaR jako s jedním rozsahem (Acond první).
+    acond_entities_only = acond_entities
+    acond_entities = acond_entities + mar_entities
 
     # YAML legacy entity – tranzitivní výběr přes acond rozsah
     yaml_in_scope = _select_yaml_in_acond_scope(
@@ -783,6 +864,7 @@ def filter_acond_only(snapshot: dict) -> dict:
         filtered_automations,
         filtered_scripts,
         filtered_scenes,
+        mar_ids,
     )
     yaml_total = sum(
         1 for e in snapshot.get("entities", []) if e.get("source") == "yaml"
@@ -819,6 +901,7 @@ def filter_acond_only(snapshot: dict) -> dict:
     return {
         "generated_at": snapshot.get("generated_at"),
         "mode": "acond",
+        "mar_installed": mar_installed,
         "versions": snapshot.get("versions", {}),
         "system_info": snapshot.get("system_info", {}),
         "config_entries": snapshot.get("config_entries", []),  # už je pro doménu acond
@@ -835,7 +918,13 @@ def filter_acond_only(snapshot: dict) -> dict:
         "recent_errors": snapshot.get("recent_errors", []),
         "stats": {
             "total_entities_in_ha": len(snapshot.get("entities", [])),
-            "acond_entities": len(acond_entities),
+            "acond_entities": len(acond_entities_only),
+            "mar": (
+                f"nainstalováno, {len(mar_entities)} entit, "
+                f"{_mar_count(filtered_automations)} automatizací, "
+                f"{_mar_count(filtered_scripts)} skriptů"
+                if mar_installed else "nenainstalováno"
+            ),
             "yaml_legacy_in_scope": len(yaml_in_scope),
             "yaml_legacy_total": yaml_total,
             "filtered_automations": len(filtered_automations),
@@ -920,7 +1009,11 @@ def format_as_markdown(snapshot: dict) -> str:
     lines: list[str] = []
 
     # ----- Hlavička + bezpečnostní varování -----
-    if mode == "acond":
+    if mode == "acond" and snapshot.get("mar_installed"):
+        title = "Acond AI kontext – Acond a MaR"
+        scope = ("Filtrováno na entity, automatizace, skripty a zařízení integrace "
+                 "Acond a doplňku MaR (Acond Regulator).")
+    elif mode == "acond":
         title = "Acond AI kontext – pouze acond entity"
         scope = "Filtrováno na entity, automatizace, skripty a zařízení integrace Acond."
     elif mode == "full":
@@ -938,7 +1031,9 @@ def format_as_markdown(snapshot: dict) -> str:
         lines.append(
             f"**Verze:** HA `{versions.get('home_assistant', '?')}` · "
             f"acond `{versions.get('acond_integration', '?')}` · "
-            f"pymodbus `{versions.get('pymodbus', '?')}`"
+            + (f"MaR `{versions['mar_integration']}` · "
+               if versions.get("mar_integration") else "")
+            + f"pymodbus `{versions.get('pymodbus', '?')}`"
         )
     lines.append("")
 
@@ -972,11 +1067,15 @@ def format_as_markdown(snapshot: dict) -> str:
     # ----- Acond config entries -----
     entries = snapshot.get("config_entries") or []
     if entries:
-        lines.append(f"## Acond config entries ({len(entries)})")
+        lines.append(f"## Config entries Acond a MaR ({len(entries)})"
+                     if any(e.get("domain") == _MAR_DOMAIN for e in entries)
+                     else f"## Acond config entries ({len(entries)})")
         lines.append("")
         for e in entries:
             eid = (e.get("entry_id") or "?")[:8]
             lines.append(f"### `{eid}…` – {_md_escape(str(e.get('title', '?')))}")
+            if e.get("domain"):
+                lines.append(f"- domain: `{e.get('domain')}`")
             lines.append(f"- state: `{e.get('state')}`")
             data = e.get("data") or {}
             if data:
@@ -1073,7 +1172,8 @@ def format_as_markdown(snapshot: dict) -> str:
     lines.append("## Logy")
     lines.append("")
 
-    lines.append(f"### Integration log – Acond (posledních {len(integration_log)} řádků)")
+    log_label = "Acond a MaR" if snapshot.get("mar_installed") or versions.get("mar_integration") else "Acond"
+    lines.append(f"### Integration log – {log_label} (posledních {len(integration_log)} řádků)")
     lines.append("")
     if integration_log:
         lines.append("```")
@@ -1331,7 +1431,8 @@ def _async_send_notification(
 
     if mode == "acond":
         title = "🤖 Acond AI kontext – jen acond entity"
-        scope_note = "Pouze entity, automatizace a zařízení integrace Acond."
+        scope_note = ("Entity, automatizace a zařízení integrace Acond "
+                      "(a doplňku MaR, je-li nainstalován).")
     else:
         title = "🤖 Acond AI kontext – kompletní HA"
         scope_note = "Celá HA konfigurace (acond + všechny ostatní integrace)."

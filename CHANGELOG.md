@@ -36,6 +36,7 @@ Being prepared as 0.3.0 (test versions 0.3.0b1–b5).
 - **Vsuvka doplňku do Pohledu.** S nainstalovaným MaR se karta „Režim TČ & Stav“ nahradí řídicím panelem se schématem soustavy; tlačítka režimů zůstávají. Bez MaR je Pohled beze změny.
 - **Okno MaR** (bez nainstalovaného MaR) popisuje, co MaR umí a co se po jeho instalaci v dashboardu změní, s odkazy na příručku MaR a na instalaci.
 - **Atributy senzorů** `raw_value`, `runtime` a `time`, jak je popisuje Nápověda.
+- **Export AI kontextu „jen acond“ zahrnuje i MaR**, je-li nainstalován: entity MaR, automatizace, skripty a scény, které na ně odkazují (podle skutečných ID entit), zařízení MaR, verzi MaR a jeho log. V souhrnu exportu je řádek „mar: nainstalováno, N entit…“ nebo „nenainstalováno“. Volby integrace MaR (poloha apod.) se do exportu nepřenáší. Bez MaR je export stejný jako dřív.
 - README: odstavec **Bez záruky** (neoficiální projekt, použití na vlastní riziko).
 
 🇬🇧 **English**
@@ -45,6 +46,7 @@ Being prepared as 0.3.0 (test versions 0.3.0b1–b5).
 - **Add-on insert into Pohled.** With MaR installed, the "Režim TČ & Stav" card is replaced by the control panel with the system schematic; mode buttons stay. Without MaR, Pohled is unchanged.
 - **MaR view** (when MaR is not installed) describes what MaR does and what installing it changes in the dashboard, with links to the MaR manual and installation.
 - **Sensor attributes** `raw_value`, `runtime` and `time`, as described in Nápověda.
+- **The "Acond only" AI context export includes MaR** when it is installed: MaR entities, automations, scripts and scenes that reference them (matched by real entity IDs), the MaR device, MaR version and its log. The export summary shows "mar: nainstalováno, N entit…" or "nenainstalováno". MaR integration options (location etc.) are not exported. Without MaR the export is unchanged.
 - README: **No warranty** paragraph (unofficial project, use at your own risk).
 
 ### Opraveno / Fixed

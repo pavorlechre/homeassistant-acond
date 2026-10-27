@@ -189,7 +189,7 @@ The integration can generate a **structured markdown file** with the current sta
 
 | Button | What it exports |
 |---|---|
-| **Generate AI Context (Acond)** | Only Acond entities + automations/scripts/scenes that reference them |
+| **Generate AI Context (Acond)** | Only Acond entities + automations/scripts/scenes that reference them. If the [MaR add-on](https://github.com/pavorlechre/acond_regulator) is installed, also its entities and the automations/scripts/scenes that use them – so the AI knows the real MaR entity IDs when writing automations |
 | **Generate AI Context (Full HA)** | The entire Home Assistant – all integrations, entities, automations |
 
 After clicking, a markdown file is generated in `/config/www/acond_ai_context/`, accessible via a download link in the HA notification. You then simply attach the file to your AI chat.

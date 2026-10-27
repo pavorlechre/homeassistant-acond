@@ -3,10 +3,11 @@
 # v0.29 (27.10.2026) – vydání integrace 0.3.0
 #
 # Změny oproti v0.28:
-#  - Žádná změna obsahu tohoto souboru. Okno MaR (bez nainstalovaného
-#    MaR) skládá skladač `lovelace_dashboard.py`; jeho text nově popisuje,
-#    co se po instalaci MaR v dashboardu změní, a odkazuje na příručku
-#    a instalaci.
+#  - Okno MaR (bez nainstalovaného MaR) skládá skladač
+#    `lovelace_dashboard.py`; jeho text nově popisuje, co se po instalaci
+#    MaR v dashboardu změní, a odkazuje na příručku a instalaci.
+#  - Diagnostika a Nápověda: export „jen acond“ zahrnuje i MaR, je-li
+#    nainstalován.
 #
 # Změny oproti v0.27:
 #  - Okna Entity a Servis ukazují obsah hned po otevření (jako okno
@@ -1139,6 +1140,9 @@ views:
 
           - **Jen acond entity** – jen entity, automatizace, zařízení a logy
             týkající se integrace Acond. Bezpečnější varianta pro sdílení.
+            Pokud je nainstalován doplněk **MaR**, export obsahuje i jeho
+            entity a automatizace, skripty a scény, které s nimi pracují –
+            AI pak při psaní automatizací zná skutečná ID entit MaR.
           - **Celé HA** – všechny integrace, pokud problém spojený s acondem
             může souviset s něčím jiným v HA.
 
@@ -1535,7 +1539,7 @@ views:
         content: |
           | Entity ID | Popis |
           |-----------|-------|
-          | `button.acond_ai_context_acond` | Export AI kontextu – jen acond entity |
+          | `button.acond_ai_context_acond` | Export AI kontextu – jen acond entity (a MaR, je-li nainstalován) |
           | `button.acond_ai_context_full` | Export AI kontextu – kompletní HA |
 
       - type: markdown

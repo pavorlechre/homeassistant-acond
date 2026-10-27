@@ -189,7 +189,7 @@ Integrace umí vygenerovat **strukturovaný markdown soubor** s aktuálním stav
 
 | Tlačítko | Co exportuje |
 |---|---|
-| **Generate AI Context (Acond)** | Pouze Acond entity + automatizace/skripty/scény, které je referencují |
+| **Generate AI Context (Acond)** | Pouze Acond entity + automatizace/skripty/scény, které je referencují. Je-li nainstalován [doplněk MaR](https://github.com/pavorlechre/acond_regulator), také jeho entity a automatizace/skripty/scény, které s nimi pracují – AI pak při psaní automatizací zná skutečná ID entit MaR |
 | **Generate AI Context (Full HA)** | Celý Home Assistant – všechny integrace, entity, automatizace |
 
 Po kliknutí se vygeneruje markdown soubor v `/config/www/acond_ai_context/`, dostupný ke stažení odkazem v notifikaci v HA. Soubor pak stačí přiložit do AI chatu.
