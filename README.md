@@ -3,7 +3,7 @@
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Home Assistant](https://img.shields.io/badge/HA-2024.11%2B-blue.svg)](https://www.home-assistant.io/)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/pavorlechre/homeassistant-acond/releases)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/pavorlechre/homeassistant-acond/releases)
 
 > 🇨🇿 **Tato dokumentace je dostupná i v češtině:** [README.cs.md](README.cs.md)
 
@@ -11,7 +11,7 @@
 
 ## ⚠️ Beta Release
 
-This integration is currently in beta (v0.2.0). It has been developed and tested on real hardware but has not yet been validated by a wider user base. **Expect occasional bugs and breaking changes** until v1.0.0. Please report issues on the [Issues page](https://github.com/pavorlechre/homeassistant-acond/issues).
+This integration is currently in beta (v0.3.0). It has been developed and tested on real hardware but has not yet been validated by a wider user base. **Expect occasional bugs and breaking changes** until v1.0.0. Please report issues on the [Issues page](https://github.com/pavorlechre/homeassistant-acond/issues).
 
 ---
 
@@ -32,7 +32,8 @@ A Home Assistant custom integration for **Acond heat pumps** communicating over 
 - **Zero YAML configuration** – just enter the heat pump's IP address
 - **115+ entities** – read-only sensors and control entities for writing (change heat pump behavior)
 - **Bidirectional control** – mode selection, setpoints, silent mode, bivalence
-- **Auto-generated Lovelace dashboard** – installed and ready immediately after setup
+- **Auto-generated Lovelace dashboard** – installed and ready immediately after setup; bar **Pohled · Entity · Servis** (Entity holds Přehled, Ovládání and Energie, Servis holds Grafy, Diagnostika, Aplikace Acond and Nápověda)
+- **Ready for the MaR add-on** – with [Acond Regulator (MaR)](https://github.com/pavorlechre/acond_regulator) installed, the dashboard adds its control panel with the system schematic to Pohled and three MaR views; without it, a MaR view explains what it would add
 - **Multilingual UI** – English and Czech (config flow + entity names)
 - **Series support** – Grandis / Economis and PRO
 - **AI Context** – generate a markdown snapshot of your HA for AI assistants with one click (fault diagnosis, YAML generation)

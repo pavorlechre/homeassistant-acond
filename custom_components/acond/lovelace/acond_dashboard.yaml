@@ -1,6 +1,12 @@
 ###############################################################################
 # Acond Heat Pump – Lovelace dashboard
-# v0.28 (30.9.2026)
+# v0.29 (27.10.2026) – vydání integrace 0.3.0
+#
+# Změny oproti v0.28:
+#  - Žádná změna obsahu tohoto souboru. Okno MaR (bez nainstalovaného
+#    MaR) skládá skladač `lovelace_dashboard.py`; jeho text nově popisuje,
+#    co se po instalaci MaR v dashboardu změní, a odkazuje na příručku
+#    a instalaci.
 #
 # Změny oproti v0.27:
 #  - Okna Entity a Servis ukazují obsah hned po otevření (jako okno

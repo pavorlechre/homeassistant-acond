@@ -3,7 +3,7 @@
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Home Assistant](https://img.shields.io/badge/HA-2024.11%2B-blue.svg)](https://www.home-assistant.io/)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](https://github.com/pavorlechre/homeassistant-acond/releases)
+[![Version](https://img.shields.io/badge/version-0.3.0-blue.svg)](https://github.com/pavorlechre/homeassistant-acond/releases)
 
 > 🇬🇧 **This documentation is also available in English:** [README.md](README.md)
 
@@ -11,7 +11,7 @@
 
 ## ⚠️ Beta verze
 
-Integrace je momentálně v beta fázi (v0.2.0). Byla vyvinuta a otestována na reálném hardware, ale ještě nebyla ověřena širší uživatelskou základnou. **Očekávejte občasné chyby a změny rozhraní** až do verze v1.0.0. Chyby prosím hlaste na [stránce Issues](https://github.com/pavorlechre/homeassistant-acond/issues).
+Integrace je momentálně v beta fázi (v0.3.0). Byla vyvinuta a otestována na reálném hardware, ale ještě nebyla ověřena širší uživatelskou základnou. **Očekávejte občasné chyby a změny rozhraní** až do verze v1.0.0. Chyby prosím hlaste na [stránce Issues](https://github.com/pavorlechre/homeassistant-acond/issues).
 
 ---
 
@@ -32,7 +32,8 @@ Custom integrace pro Home Assistant pro **tepelná čerpadla Acond** komunikují
 - **Nulová YAML konfigurace** – stačí zadat IP adresu tepelného čerpadla
 - **115+ entit** – senzory pro čtení i ovládací entity pro zápis (mění chování TČ)
 - **Obousměrné ovládání** – výběr režimů, setpointy, tichý provoz, bivalence
-- **Auto-generovaný Lovelace dashboard** – nainstalován a připraven ihned po nastavení
+- **Auto-generovaný Lovelace dashboard** – nainstalován a připraven ihned po nastavení; lišta **Pohled · Entity · Servis** (v Entity jsou Přehled, Ovládání a Energie, v Servisu Grafy, Diagnostika, Aplikace Acond a Nápověda)
+- **Připraven na doplněk MaR** – s nainstalovaným [Acond Regulator (MaR)](https://github.com/pavorlechre/acond_regulator) dostane Pohled nahoře řídicí panel se schématem soustavy a přibudou tři okna MaR; bez něj okno MaR vysvětlí, co by přidal
 - **Vícejazyčné rozhraní** – čeština a angličtina (config flow + názvy entit)
 - **Podpora sérií** – Grandis / Economis a PRO
 - **AI kontext** – jedním kliknutím vygeneruješ markdown soubor pro AI asistenta s aktuálním stavem HA (diagnostika poruch, generování YAML)

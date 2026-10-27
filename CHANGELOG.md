@@ -10,19 +10,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Nevydáno / Unreleased]
 
+Připravuje se jako 0.3.0 (testovací verze 0.3.0b1–b5).
+Being prepared as 0.3.0 (test versions 0.3.0b1–b5).
+
+### Přechod z 0.2.0 / Upgrading from 0.2.0
+
+🇨🇿 **Česky**
+
+- Aktualizace přes HACS, pak **plný restart HA** (reload integrace nestačí – dashboard se skládá při startu).
+- Entity, jejich ID, nastavení integrace ani adresy oken dashboardu se nemění. Automatizace a záložky fungují dál.
+- Dashboard dostane novou lištu (viz níže). Kdo si dashboard Acond kopíroval do vlastního, kopie se nezmění.
+
+🇬🇧 **English**
+
+- Update via HACS, then a **full HA restart** (an integration reload is not enough – the dashboard is assembled at startup).
+- Entities, their IDs, integration options and dashboard view URLs are unchanged. Automations and bookmarks keep working.
+- The dashboard gets a new bar (see below). If you copied the Acond dashboard into your own, your copy is not changed.
+
 ### Přidáno / Added
 
 🇨🇿 **Česky**
 
-- **Skládací dashboard.** Dashboard Acond TČ se při startu skládá ze základu a z oken doplňků. Když je nainstalovaný doplněk Acond Regulator (MaR), jeho okna se přidají na konec; když není, zobrazí se na konci okno s odkazem na něj. Složený výsledek je v `acond_dashboard.generated.yaml`, základ `acond_dashboard.yaml` se jen čte. Změny se projeví po **restartu HA**, ne po reloadu integrace.
-- **Nová lišta dashboardu: Pohled, Entity, Servis.** Přehled, Ovládání a Energie jsou podokna okna Entity; Grafy, Diagnostika, Aplikace Acond a Nápověda podokna okna Servis (otevírají se tlačítkem, šipka zpět vlevo nahoře). Adresy oken se nemění, záložky fungují dál.
-- **Vsuvka doplňku do Pohledu.** S nainstalovaným MaR se karta „Režim TČ & Stav“ nahradí schématem soustavy; tlačítka režimů zůstávají. Bez MaR je Pohled beze změny a v liště je okno MaR s odkazem.
+- **Skládací dashboard.** Dashboard Acond TČ se při startu skládá ze základu a z oken doplňků. Když je nainstalovaný doplněk Acond Regulator (MaR), jeho okna se přidají na konec; když není, zobrazí se na konci okno MaR. Složený výsledek je v `acond_dashboard.generated.yaml`, základ `acond_dashboard.yaml` se jen čte.
+- **Nová lišta dashboardu: Pohled, Entity, Servis.** Entity rovnou ukazuje Přehled a vede na podokna Ovládání a Energie; Servis rovnou ukazuje Grafy a vede na Diagnostiku, Aplikaci Acond a Nápovědu. Podokna mají navigační řádek a šipku zpět. Adresy oken se nemění, záložky fungují dál.
+- **Vsuvka doplňku do Pohledu.** S nainstalovaným MaR se karta „Režim TČ & Stav“ nahradí řídicím panelem se schématem soustavy; tlačítka režimů zůstávají. Bez MaR je Pohled beze změny.
+- **Okno MaR** (bez nainstalovaného MaR) popisuje, co MaR umí a co se po jeho instalaci v dashboardu změní, s odkazy na příručku MaR a na instalaci.
+- **Atributy senzorů** `raw_value`, `runtime` a `time`, jak je popisuje Nápověda.
+- README: odstavec **Bez záruky** (neoficiální projekt, použití na vlastní riziko).
 
 🇬🇧 **English**
 
-- **Composable dashboard.** At startup the Acond TČ dashboard is assembled from the base file and add-on views. With Acond Regulator (MaR) installed, its views are appended at the end; without it, a final view links to it. The result is written to `acond_dashboard.generated.yaml`; the base `acond_dashboard.yaml` is only read. Changes take effect after an **HA restart**, not an integration reload.
-- **New dashboard bar: Pohled, Entity, Servis.** Přehled, Ovládání and Energie are subviews of Entity; Grafy, Diagnostika, Aplikace Acond and Nápověda subviews of Servis (opened by buttons, back arrow top left). View URLs are unchanged, bookmarks keep working.
-- **Add-on insert into Pohled.** With MaR installed, the "Režim TČ & Stav" card is replaced by the system schematic; mode buttons stay. Without MaR, Pohled is unchanged and a MaR view with a link sits in the bar.
+- **Composable dashboard.** At startup the Acond TČ dashboard is assembled from the base file and add-on views. With Acond Regulator (MaR) installed, its views are appended at the end; without it, a final MaR view is shown. The result is written to `acond_dashboard.generated.yaml`; the base `acond_dashboard.yaml` is only read.
+- **New dashboard bar: Pohled, Entity, Servis.** Entity shows Přehled directly and leads to the Ovládání and Energie subviews; Servis shows Grafy directly and leads to Diagnostika, Aplikace Acond and Nápověda. Subviews have a navigation row and a back arrow. View URLs are unchanged, bookmarks keep working.
+- **Add-on insert into Pohled.** With MaR installed, the "Režim TČ & Stav" card is replaced by the control panel with the system schematic; mode buttons stay. Without MaR, Pohled is unchanged.
+- **MaR view** (when MaR is not installed) describes what MaR does and what installing it changes in the dashboard, with links to the MaR manual and installation.
+- **Sensor attributes** `raw_value`, `runtime` and `time`, as described in Nápověda.
+- README: **No warranty** paragraph (unofficial project, use at your own risk).
 
 ### Opraveno / Fixed
 
@@ -30,13 +53,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Integrace se sama vzpamatuje, když bylo TČ při startu HA vypnuté.** Zjištění registrů (probe) se opakuje s rostoucím odstupem (1 min → max. 30 min), dokud neuspěje. Dřív zůstala integrace bez hodnot až do ručního reloadu.
 - **Tišší log při výpadku TČ.** První neúspěšné připojení se zapíše jako chyba, další pokusy jen do ladicího logu a obnovení spojení jako informace. Při výpadku se už nepokouší o ~60 připojení každých 15 s.
+- **Banner „Aktivní chyba TČ“ v Pohledu** se ukáže jen při skutečné poruše (30007 bit 2), ne při dočasných hlášeních, která samy zmizí.
+- **Karty v Pohledu přes celou šířku** – dřív zabraly jen polovinu.
 - Tlačítka exportu AI kontextu v okně Diagnostika používají novou syntaxi `perform-action`.
+- `hacs.json` uvádí stejné minimum Home Assistant jako README (2024.11.0).
 
 🇬🇧 **English**
 
 - **The integration recovers on its own when the heat pump was off at HA startup.** Register probing is retried with growing backoff (1 min → max 30 min) until it succeeds. Previously it stayed empty until a manual reload.
 - **Quieter log during heat pump outages.** The first failed connection is logged as an error, further attempts at debug level, and recovery as info. No more ~60 connection attempts every 15 s during an outage.
+- **"Active heat pump fault" banner in Pohled** shows only on a genuine fault (30007 bit 2), not on transient messages that clear themselves.
+- **Full-width cards in Pohled** – previously they took only half the width.
 - AI context export buttons in the Diagnostika view use the current `perform-action` syntax.
+- `hacs.json` states the same minimum Home Assistant version as the README (2024.11.0).
 
 ## [0.2.0] - 2026-06-01
 
