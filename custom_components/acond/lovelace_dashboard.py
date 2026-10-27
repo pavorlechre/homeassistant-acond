@@ -12,7 +12,7 @@ výsledek do `acond_dashboard.generated.yaml`, který pak zaregistruje.
 - Když je add-on přítomen (soubor jeho příspěvku existuje) → natáhne jeho
   view(s) a vloží je jako poslední záložky. Add-on smí přispět jedním nebo
   více okny – Acond vezme seznam tak, jak přijde.
-- Když add-on chybí → zobrazí teaser (markdown s odkazem na repozitář).
+- Když add-on chybí → zobrazí teaser (markdown s popisem a odkazy).
   To je zároveň „reklama" na MaR; Acond o add-onu zná jen jméno a odkaz,
   ne jeho obsah.
 
@@ -71,11 +71,26 @@ ADDONS: list[dict] = [
         "path": "regulace",
         "icon": "mdi:chart-bell-curve-cumulative",
         "repo_url": "https://github.com/pavorlechre/acond_regulator",
+        # Instalační kroky jsou jen v README MaR (odkaz Instalace), ať tento
+        # text nezastará, když MaR dostane vydání nebo bude v HACS.
         "teaser": (
             "**Měření a Regulaci (MaR)** pro Acond lze doplnit samostatnou "
             "integrací **Acond Regulator** – ekvitermní regulace s předpovědí "
             "počasí, topení z přebytků FVE, časové programy, schéma soustavy "
-            "a statistika. Bez ní Acond běží normálně dál."
+            "a statistika. Bez ní Acond běží normálně dál.\n\n"
+            "**Co se po instalaci MaR změní v tomto dashboardu:**\n\n"
+            "- Okno **Pohled** dostane nahoře **řídicí panel se schématem "
+            "soustavy** – živý obrázek čerpadla, nádrží a domu s tlačítky pro "
+            "strategie a časové programy. Tlačítka režimů Aconda zůstanou "
+            "pod ním.\n"
+            "- Místo tohoto okna přibudou tři okna MaR: **Režimy**, "
+            "**FVE TUV** a **Statistika**.\n"
+            "- Ostatní okna Aconda zůstanou, jak jsou. Když MaR odinstaluješ, "
+            "dashboard se po restartu vrátí do dnešní podoby.\n\n"
+            "📖 **[Příručka MaR](https://pavorlechre.github.io/acond_regulator/)**"
+            " – podívej se, jak MaR vypadá a co umí.\n\n"
+            "🔧 **[Instalace](https://github.com/pavorlechre/acond_regulator)**"
+            " – návod je na stránce repozitáře."
         ),
         "contribution_files": [
             "custom_components/acond_regulator/dashboard/views.yaml",
@@ -131,11 +146,8 @@ def _teaser_view(addon: dict) -> dict:
         "cards": [
             {
                 "type": "markdown",
-                "content": (
-                    f"## {addon['title']}\n\n"
-                    f"{addon['teaser']}\n\n"
-                    f"Repozitář: [{addon['repo_url']}]({addon['repo_url']})"
-                ),
+                # Odkazy (příručka, instalace) nese text teaseru sám.
+                "content": f"## {addon['title']}\n\n{addon['teaser']}",
             }
         ],
     }
