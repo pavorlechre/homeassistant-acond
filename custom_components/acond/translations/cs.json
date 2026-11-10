@@ -41,5 +41,515 @@
       "invalid_host": "Neplatná IP adresa",
       "comp_min_ge_max": "Minimum kompresoru musí být menší než maximum"
     }
+  },
+  "entity": {
+    "sensor": {
+      "t_set_indoor1": {
+        "name": "Požadovaná teplota okruh 1"
+      },
+      "t_act_indoor1": {
+        "name": "Teplota okruh 1"
+      },
+      "t_set_indoor2": {
+        "name": "Požadovaná teplota okruh 2"
+      },
+      "t_act_indoor2": {
+        "name": "Teplota okruh 2"
+      },
+      "t_set_tuv": {
+        "name": "Požadovaná teplota TUV"
+      },
+      "t_act_tuv": {
+        "name": "Teplota TUV"
+      },
+      "tc_status": {
+        "name": "Stav TČ"
+      },
+      "t_set_water_back": {
+        "name": "Požadovaná teplota zpátečky"
+      },
+      "t_act_water_back": {
+        "name": "Teplota zpátečky"
+      },
+      "t_act_air": {
+        "name": "Venkovní teplota"
+      },
+      "t_act_solar": {
+        "name": "Teplota solárního panelu"
+      },
+      "t_act_pool": {
+        "name": "Teplota bazénu"
+      },
+      "t_set_pool": {
+        "name": "Požadovaná teplota bazénu"
+      },
+      "hp_mode": {
+        "name": "Režim TČ"
+      },
+      "regulation_type": {
+        "name": "Typ regulace"
+      },
+      "brine_temp": {
+        "name": "Teplota solanky"
+      },
+      "heartbeat": {
+        "name": "Čítač komunikace Modbus"
+      },
+      "t_act_water_outlet": {
+        "name": "Teplota topné vody"
+      },
+      "t_set_water_outlet": {
+        "name": "Požadovaná teplota výstupu chlazení"
+      },
+      "comp_rpm_max": {
+        "name": "Max. otáčky kompresoru"
+      },
+      "err_number": {
+        "name": "Stav TČ – popis chyby"
+      },
+      "err_number_driver": {
+        "name": "Stav driveru – popis chyby"
+      },
+      "comp_rpm_actual": {
+        "name": "Aktuální otáčky kompresoru"
+      },
+      "actual_pwm": {
+        "name": "Rychlost oběhového čerpadla"
+      },
+      "manual_pwm": {
+        "name": "Manuální režim prim. čerpadla"
+      },
+      "aep": {
+        "name": "Elektrický příkon"
+      },
+      "ahp": {
+        "name": "Tepelný výkon"
+      },
+      "cop": {
+        "name": "Topný faktor COP"
+      },
+      "t02_eh": {
+        "name": "Teplota E-heateru"
+      },
+      "manual_eh": {
+        "name": "Povolení režimu Bivalence"
+      },
+      "silent_mode": {
+        "name": "Tichý provoz"
+      },
+      "silent_mode_start": {
+        "name": "Tichý provoz – začátek (min od 00:00)"
+      },
+      "silent_mode_stop": {
+        "name": "Tichý provoz – konec (min od 00:00)"
+      },
+      "tes": {
+        "name": "Tepelná energie celkem"
+      },
+      "ees": {
+        "name": "Elektrická energie celkem"
+      },
+      "ted": {
+        "name": "Tepelná energie dnes"
+      },
+      "eed": {
+        "name": "Elektrická energie dnes"
+      },
+      "scop": {
+        "name": "Sezónní topný faktor SCOP"
+      },
+      "t_act_hp": {
+        "name": "Kondenzační teplota"
+      },
+      "t_act_lp": {
+        "name": "Vypařovací teplota"
+      },
+      "thermal_power": {
+        "name": "Třída tepelného výkonu"
+      },
+      "hp_component_status": {
+        "name": "Stav komponent"
+      },
+      "fan_speed": {
+        "name": "Rychlost ventilátoru"
+      },
+      "eev_steps": {
+        "name": "Poloha expanzního ventilu"
+      },
+      "t_act_suction": {
+        "name": "Sací teplota"
+      },
+      "t_act_discharge": {
+        "name": "Výtlačná teplota"
+      },
+      "compressor_hours": {
+        "name": "Hodiny kompresoru"
+      },
+      "compressor_min": {
+        "name": "Minuty kompresoru"
+      },
+      "fan_hours": {
+        "name": "Hodiny ventilátoru"
+      },
+      "fan_min": {
+        "name": "Minuty ventilátoru"
+      },
+      "rv_hours": {
+        "name": "Hodiny reverzního ventilu"
+      },
+      "rv_min": {
+        "name": "Minuty reverzního ventilu"
+      },
+      "pump_hours": {
+        "name": "Hodiny oběhového čerpadla"
+      },
+      "pump_min": {
+        "name": "Minuty oběhového čerpadla"
+      },
+      "bivalence1_hours": {
+        "name": "Hodiny bivalence 1"
+      },
+      "bivalence1_min": {
+        "name": "Minuty bivalence 1"
+      },
+      "bivalence2_hours": {
+        "name": "Hodiny bivalence 2"
+      },
+      "bivalence2_min": {
+        "name": "Minuty bivalence 2"
+      },
+      "cooling_energy": {
+        "name": "Chladicí energie celkem"
+      },
+      "ece": {
+        "name": "Elektrická energie chlazení celkem"
+      },
+      "ced": {
+        "name": "Chladicí energie dnes"
+      },
+      "eecd": {
+        "name": "Elektrická energie chlazení dnes"
+      },
+      "reset_plc": {
+        "name": "Stav resetu PLC"
+      },
+      "compressor_starts": {
+        "name": "Počet startů kompresoru"
+      },
+      "comp_rpm_max_power": {
+        "name": "Max. výkon kompresoru"
+      },
+      "comp_rpm_actual_power": {
+        "name": "Aktuální výkon kompresoru"
+      }
+    },
+    "number": {
+      "t_set_indoor1": {
+        "name": "Požadovaná teplota okruh 1"
+      },
+      "t_corr_indoor1": {
+        "name": "Teplota okruh 1 z ext. senzoru"
+      },
+      "t_set_indoor2": {
+        "name": "Požadovaná teplota okruh 2"
+      },
+      "t_corr_indoor2": {
+        "name": "Teplota okruh 2 z ext. senzoru"
+      },
+      "t_set_tuv": {
+        "name": "Požadovaná teplota TUV"
+      },
+      "t_set_water_back": {
+        "name": "Požadovaná teplota zpátečky - Standard"
+      },
+      "t_corr_air": {
+        "name": "Venkovní teplota z ext. čidla"
+      },
+      "t_corr_solar": {
+        "name": "Solární teplota z ext. čidla"
+      },
+      "t_corr_pool": {
+        "name": "Bazénová teplota z ext. čidla"
+      },
+      "t_set_pool": {
+        "name": "Požadovaná teplota bazénu"
+      },
+      "t_set_water_outlet": {
+        "name": "Požadovaná teplota výstupu chlazení"
+      },
+      "comp_capacity_max_set": {
+        "name": "Max. otáčky kompresoru"
+      },
+      "pwm_set": {
+        "name": "Nast. rychlosti oběh. čerpadla"
+      },
+      "silent_mode_start_set": {
+        "name": "Tichý provoz – začátek (min od 00:00)"
+      },
+      "silent_mode_stop_set": {
+        "name": "Tichý provoz – konec (min od 00:00)"
+      },
+      "comp_capacity_max_set_power": {
+        "name": "Max. výkon kompresoru"
+      }
+    },
+    "switch": {
+      "manual_pwm_set": {
+        "name": "Povolení řízení ob. čerpadla"
+      },
+      "manual_eh_set": {
+        "name": "Povolení bivalence"
+      },
+      "silent_mode_set": {
+        "name": "Tichý provoz"
+      },
+      "tc_set_bit_0": {
+        "name": "Automatický režim"
+      },
+      "tc_set_bit_1": {
+        "name": "Režim pouze TČ"
+      },
+      "tc_set_bit_2": {
+        "name": "Režim bivalence"
+      },
+      "tc_set_bit_3": {
+        "name": "Vypnuto"
+      },
+      "tc_set_bit_4": {
+        "name": "Režim chlazení"
+      },
+      "tc_set_bit_6": {
+        "name": "Solár zapnuto"
+      },
+      "tc_set_bit_7": {
+        "name": "Bazén zapnuto"
+      }
+    },
+    "select": {
+      "sel_regulation_type": {
+        "name": "Typ regulace"
+      }
+    },
+    "button": {
+      "tc_set_bit_5": {
+        "name": "Potvrzení poruchy"
+      },
+      "reset_plc_set": {
+        "name": "Reset PLC – varování, jen pro poučené"
+      },
+      "tc_set_bit_8": {
+        "name": "Přepnout léto/zima"
+      },
+      "reset_t_corr_indoor1": {
+        "name": "Přepnout na interní čidlo okruh 1"
+      },
+      "reset_t_corr_indoor2": {
+        "name": "Přepnout na interní čidlo okruh 2"
+      },
+      "reset_t_corr_air": {
+        "name": "Přepnout na interní venkovní čidlo"
+      },
+      "reset_t_corr_solar": {
+        "name": "Přepnout na interní solární čidlo"
+      },
+      "reset_t_corr_pool": {
+        "name": "Přepnout na interní bazénové čidlo"
+      },
+      "ai_context_acond": {
+        "name": "Export AI kontextu – jen acond"
+      },
+      "ai_context_full": {
+        "name": "Export AI kontextu – celé HA"
+      }
+    },
+    "binary_sensor": {
+      "tc_status_bit_0": {
+        "name": "TČ zapnuto"
+      },
+      "tc_status_bit_1": {
+        "name": "TČ v provozu"
+      },
+      "tc_status_bit_2": {
+        "name": "Porucha TČ"
+      },
+      "tc_status_bit_3": {
+        "name": "Ohřev TUV"
+      },
+      "tc_status_bit_4": {
+        "name": "Čerpadlo okruh 1"
+      },
+      "tc_status_bit_5": {
+        "name": "Čerpadlo okruh 2"
+      },
+      "tc_status_bit_6": {
+        "name": "Solární cirkulace"
+      },
+      "tc_status_bit_7": {
+        "name": "Bazénová cirkulace"
+      },
+      "tc_status_bit_8": {
+        "name": "Odmrazování"
+      },
+      "tc_status_bit_9": {
+        "name": "Bivalence"
+      },
+      "tc_status_bit_10": {
+        "name": "Letní provoz"
+      },
+      "tc_status_bit_11": {
+        "name": "Solankové čerpadlo"
+      },
+      "tc_status_bit_12": {
+        "name": "Chlazení"
+      },
+      "hp_comp_bit_0": {
+        "name": "Kompresor"
+      },
+      "hp_comp_bit_1": {
+        "name": "Ventilátor"
+      },
+      "hp_comp_bit_2": {
+        "name": "Primární čerpadlo"
+      },
+      "hp_comp_bit_3": {
+        "name": "Reverzní ventil"
+      }
+    }
+  },
+  "common": {
+    "export_title_acond": "🤖 Acond AI kontext – jen acond entity",
+    "export_title_full": "🤖 Acond AI kontext – kompletní HA",
+    "export_scope_acond": "Entity, automatizace a zařízení integrace Acond (a doplňku MaR, je-li nainstalován).",
+    "export_scope_full": "Celá HA konfigurace (acond + všechny ostatní integrace).",
+    "export_file_created": "Soubor vytvořen",
+    "export_download": "Stáhnout export",
+    "export_link_help": "Pokud klik nereaguje (např. v mobilní HA aplikaci), zkopíruj URL a otevři ji v prohlížeči:",
+    "export_privacy": "Před odesláním do AI nebo na fórum zkontroluj obsah – automatická redakce zachytí běžné secrets, ale není 100% spolehlivá. Pozor zejména na IP adresy, e-maily, GPS, jména a názvy sítí.",
+    "export_error_title": "❌ Acond AI kontext – chyba",
+    "export_error_message": "Export AI kontextu selhal:\n\n```\n{error}\n```\n\nDetail najdeš v logu HA (vyhledej `acond`).",
+    "dashboard_title": "Acond TČ",
+    "unknown_err_number": "Neznámá chyba {code}",
+    "unknown_err_number_driver": "Neznámá chyba driveru {code}",
+    "unknown_hp_mode": "Neznámý režim {code}",
+    "unknown_regulation_type": "Neznámá regulace {code}",
+    "unknown_thermal_power": "Neznámý výkon {code}",
+    "state_err_number_0": "OK",
+    "state_err_number_1": "A16 – Low pressure",
+    "state_err_number_2": "A12 – High pressure",
+    "state_err_number_3": "A01 – Outlet temperature low",
+    "state_err_number_4": "A02 – Condensing temperature high",
+    "state_err_number_5": "A07 – Driver hardware fault",
+    "state_err_number_6": "A03 – IP address is not valid",
+    "state_err_number_7": "A05 – Driver system fault",
+    "state_err_number_9": "A13 – DHW sanitation too long",
+    "state_err_number_10": "A04 – Return water temperature low",
+    "state_err_number_11": "A10 – Outlet water temperature high",
+    "state_err_number_12": "A14 – Return water temperature high",
+    "state_err_number_13": "A08 – Suction temperature low",
+    "state_err_number_14": "A09 – Defrosting too long",
+    "state_err_number_15": "W07 – EEV too open",
+    "state_err_number_16": "W01 – Superheat low",
+    "state_err_number_17": "W02 – Driver compressor fault",
+    "state_err_number_18": "W00 – Defrosting too long",
+    "state_err_number_19": "W04 – Too many defrosts",
+    "state_err_number_20": "W05 – Ground collector temp low",
+    "state_err_number_21": "W12 – Fan running fault",
+    "state_err_number_22": "W06 – Sensors blocked",
+    "state_err_number_23": "HW1 – Heating DHW too long",
+    "state_err_number_24": "W09 – Discharge temperature high",
+    "state_err_number_25": "SYS – Compressor running fault",
+    "state_err_number_26": "W11 – Suction temperature high",
+    "state_err_number_27": "W16 – Flow through heat exchanger low",
+    "state_err_number_28": "SH1 – Outlet temperature low",
+    "state_err_number_29": "CMP – Compressor running fault",
+    "state_err_number_30": "PFC – Driver PFC fault",
+    "state_err_number_31": "ELC – Driver microelectronics fault",
+    "state_err_number_35": "W08 – Max number of comp starts",
+    "state_err_number_36": "W17 – Evaporating temperature low",
+    "state_err_number_40": "P05 – Domestic hot water sensor",
+    "state_err_number_41": "P04 – Suction line temp sensor",
+    "state_err_number_42": "P02 – Return water temp sensor",
+    "state_err_number_43": "P06 – Evaporator temperature sensor",
+    "state_err_number_44": "P03 – Room 2 temperature sensor",
+    "state_err_number_45": "P01 – Solar collector temp sensor",
+    "state_err_number_46": "P07 – Pool temperature sensor",
+    "state_err_number_47": "P09 – Room temperature sensor",
+    "state_err_number_48": "P08 – Outdoor temperature sensor",
+    "state_err_number_49": "P10 – Outlet water temp sensor",
+    "state_err_number_50": "PER – Communication with perif lost",
+    "state_err_number_51": "P11 – Mixing valve temperature sensor",
+    "state_err_number_52": "P15 – Low pressure sensor",
+    "state_err_number_53": "P16 – High pressure sensor",
+    "state_err_number_54": "P13 – Discharge line temp sensor",
+    "state_err_number_55": "P17 – Domestic hot water sensor 2",
+    "state_err_number_56": "A19 – Heating DHW too long 2",
+    "state_err_number_60": "A18 – Suction temp or LP during defrost low",
+    "state_err_number_61": "A11 – ERR communication with driver",
+    "state_err_number_62": "A15 – IGBT overheat (driver)",
+    "state_err_number_63": "P99 – Blocked – unpaid",
+    "state_err_number_64": "W00 – OK",
+    "state_err_number_90": "W10 – Low flow during defrost/cooling",
+    "state_err_number_91": "W14 – Big difference return and DHW temperature",
+    "state_err_number_92": "W13 – Too many restarts of PLC",
+    "state_err_number_93": "W15 – SD card fault",
+    "state_err_number_94": "A17 – Temperature of storage tank low",
+    "state_err_number_95": "ST1 – Soft fault in the engine room",
+    "state_err_number_96": "ST2 – Serious fault in the engine room",
+    "state_err_number_driver_0": "OK",
+    "state_err_number_driver_1": "Stuck relay",
+    "state_err_number_driver_2": "DLT temperature sensor fault",
+    "state_err_number_driver_3": "Communication lost",
+    "state_err_number_driver_4": "EEPROM",
+    "state_err_number_driver_5": "AC overcurrent",
+    "state_err_number_driver_6": "AC overvoltage",
+    "state_err_number_driver_7": "Comp U current sensor fault",
+    "state_err_number_driver_8": "Comp V current sensor fault",
+    "state_err_number_driver_9": "Comp W current sensor fault",
+    "state_err_number_driver_10": "PFC current sensor fault",
+    "state_err_number_driver_11": "IPM temperature sensor fault",
+    "state_err_number_driver_12": "PFC temperature sensor fault",
+    "state_err_number_driver_13": "IPM overheat",
+    "state_err_number_driver_14": "IGBT overheat",
+    "state_err_number_driver_15": "Compressor code fault",
+    "state_err_number_driver_16": "Compressor HW overcurrent",
+    "state_err_number_driver_17": "AC undervoltage",
+    "state_err_number_driver_18": "DC overvoltage",
+    "state_err_number_driver_19": "DC undervoltage",
+    "state_err_number_driver_20": "HP/LP switch",
+    "state_err_number_driver_21": "Input loss of phase fault",
+    "state_err_number_driver_22": "Compressor U phase overcurrent",
+    "state_err_number_driver_23": "Compressor overload",
+    "state_err_number_driver_24": "Compressor DLT over temperature",
+    "state_err_number_driver_25": "Compressor IPM desat protection",
+    "state_err_number_driver_26": "Compressor V phase overcurrent",
+    "state_err_number_driver_27": "Compressor W phase overcurrent",
+    "state_err_number_driver_28": "Compressor loss of phase",
+    "state_err_number_driver_29": "Compressor lost rotor",
+    "state_err_number_driver_30": "Compressor startup failure",
+    "state_err_number_driver_31": "A AD fault",
+    "state_err_number_driver_32": "A wrong addressing",
+    "state_err_number_driver_33": "Modbus VSS communication fault",
+    "state_err_number_driver_34": "Compressor lost rotor 2",
+    "state_err_number_driver_35": "Compressor lost rotor 3",
+    "state_err_number_driver_36": "PFC HW overcurrent",
+    "state_err_number_driver_37": "PFC SW overcurrent",
+    "state_err_number_driver_38": "PFC overvoltage",
+    "state_err_number_driver_39": "n/a",
+    "state_hp_mode_0": "Automatický",
+    "state_hp_mode_1": "Pouze TČ",
+    "state_hp_mode_3": "Pouze bivalence",
+    "state_hp_mode_4": "Vypnuto",
+    "state_hp_mode_5": "Manuální",
+    "state_hp_mode_6": "Chlazení",
+    "state_regulation_type_0": "AcondTherm",
+    "state_regulation_type_1": "Ekvitermní",
+    "state_regulation_type_2": "Standard",
+    "state_thermal_power_1": "12 kW",
+    "state_thermal_power_2": "5 kW",
+    "state_thermal_power_6": "20 kW",
+    "state_silent_mode_0": "Vypnuto",
+    "state_silent_mode_1": "Zapnuto",
+    "unknown_silent_mode": "Neznámý stav {code}",
+    "invalid_silent_time": "Mimo rozsah integrace: {minutes} min"
   }
 }

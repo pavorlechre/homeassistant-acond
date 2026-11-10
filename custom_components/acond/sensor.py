@@ -18,6 +18,7 @@ from .const import (
     REG_TYPES,
     THERMAL_POWER,
 )
+from .localization import localized_state, text
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -71,6 +72,8 @@ async def async_setup_entry(
 class AcondSensor(CoordinatorEntity, SensorEntity):
     """Senzor čtený z coordinatoru."""
 
+    _attr_has_entity_name = True
+
     def __init__(self, coordinator, sensor_def, entry_id: str, hp_series: str, host: str):
         super().__init__(coordinator)
         self._sensor_def = sensor_def
@@ -78,27 +81,20 @@ class AcondSensor(CoordinatorEntity, SensorEntity):
         self._host = host
         self._entry_id = entry_id
 
-        self._attr_name = sensor_def.name
+        self._attr_translation_key = sensor_def.key
         self._attr_unique_id = f"acond_{sensor_def.address}_{sensor_def.key}"
         # Stabilní entity_id – dashboard YAML se na něj spoléhá
         self.entity_id = f"sensor.acond_{sensor_def.address}_{sensor_def.key}"
         self._attr_device_class = sensor_def.device_class
         self._attr_state_class = sensor_def.state_class
 
-        # Jednotka a název – pro kompresorové senzory závisí na sérii
-        # Standard série: name z const.py (obsahuje "otáčky"), unit "rpm"
-        # PRO série: name přepsán "otáčky" → "výkon", unit W
+        # Compressor units and translated names depend on the pump series.
         if sensor_def.key in _SERIES_UNIT_KEYS:
             if hp_series == "PRO":
                 self._attr_native_unit_of_measurement = UnitOfPower.WATT
-                self._attr_name = (
-                    sensor_def.name
-                    .replace("otáčky", "výkon")
-                    .replace("Otáčky", "Výkon")
-                )
+                self._attr_translation_key = f"{sensor_def.key}_power"
             else:
                 self._attr_native_unit_of_measurement = "rpm"
-                # name zůstane z const.py – už obsahuje "otáčky"
         else:
             self._attr_native_unit_of_measurement = sensor_def.unit
 
@@ -134,6 +130,10 @@ class AcondSensor(CoordinatorEntity, SensorEntity):
         try:
             if key in _TEXT_KEYS:
                 attrs["raw_value"] = int(value)
+                # Add a label without changing native states consumed by MaR.
+                attrs["localized_state"] = localized_state(
+                    self.hass, key, int(value), self.native_value
+                )
             elif key.endswith("_hours"):
                 hours = int(value)
                 minutes = data.get(key[: -len("_hours")] + "_min")
@@ -144,6 +144,17 @@ class AcondSensor(CoordinatorEntity, SensorEntity):
             elif key in _TIME_KEYS:
                 total = int(value)
                 attrs["time"] = f"{(total // 60) % 24:02d}:{total % 60:02d}"
+                attrs["localized_state"] = (
+                    attrs["time"] if 0 <= total <= 1440
+                    else text(
+                        self.hass, "invalid_silent_time",
+                        "Out of range: {minutes} min", minutes=total,
+                    )
+                )
+            elif key == "silent_mode":
+                attrs["localized_state"] = localized_state(
+                    self.hass, key, int(value), str(self.native_value)
+                )
         except (TypeError, ValueError):
             pass
         return attrs

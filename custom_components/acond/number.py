@@ -86,6 +86,8 @@ class AcondNumber(CoordinatorEntity, NumberEntity):
     nesmyslné hodnoty mimo slider rozsah).
     """
 
+    _attr_has_entity_name = True
+
     def __init__(
         self,
         coordinator,
@@ -111,6 +113,7 @@ class AcondNumber(CoordinatorEntity, NumberEntity):
         self._mirror_key: str | None = WRITE_KEY_TO_MIRROR_KEY.get(number_def.key)
 
         self._attr_unique_id = f"acond_{number_def.address}_{number_def.key}"
+        self._attr_translation_key = number_def.key
         self._attr_device_class = number_def.device_class
         self._attr_mode = NumberMode.BOX
         # Stabilní entity_id – dashboard YAML se na něj spoléhá
@@ -119,12 +122,11 @@ class AcondNumber(CoordinatorEntity, NumberEntity):
         # Dynamické přiřazení podle série pro kompresor
         if number_def.key == _SERIES_DEPENDENT_KEY:
             if hp_series == "PRO":
-                self._attr_name = "Max. výkon kompresoru"
+                self._attr_translation_key = f"{number_def.key}_power"
                 self._attr_native_unit_of_measurement = UnitOfPower.WATT
                 self._attr_native_step = 100
             else:
                 # Standard série (Grandis / Economis): rpm
-                self._attr_name = "Max. otáčky kompresoru"
                 self._attr_native_unit_of_measurement = "rpm"
                 self._attr_native_step = 1
             # Min/Max ze série defaults, případně override z options flow.
@@ -137,7 +139,6 @@ class AcondNumber(CoordinatorEntity, NumberEntity):
                 comp_max_override if comp_max_override is not None else number_def.max_value
             )
         else:
-            self._attr_name = number_def.name
             self._attr_native_unit_of_measurement = number_def.unit
             self._attr_native_min_value = number_def.min_value
             # TUV max override – jen pro t_set_tuv, jinde definice z NUMBER_DEFINITIONS.

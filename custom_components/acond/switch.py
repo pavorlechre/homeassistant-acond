@@ -98,6 +98,8 @@ class AcondSwitch(CoordinatorEntity, SwitchEntity):
        WRITE_KEY_TO_MIRROR_KEY (manual_pwm, manual_eh, silent_mode).
     """
 
+    _attr_has_entity_name = True
+
     def __init__(self, coordinator, client, switch_def, entry_id: str, hp_series: str, host: str):
         super().__init__(coordinator)
         self._switch_def = switch_def
@@ -111,7 +113,7 @@ class AcondSwitch(CoordinatorEntity, SwitchEntity):
         # Nepoužívá se pro non-mode switche.
         self._mode_switches: dict[int, "AcondSwitch"] | None = None
 
-        self._attr_name = switch_def.name
+        self._attr_translation_key = switch_def.key
         self._attr_unique_id = f"acond_{switch_def.address}_{switch_def.key}"
         # Stabilní entity_id – dashboard YAML se na něj spoléhá
         self.entity_id = f"switch.acond_{switch_def.address}_{switch_def.key}"
