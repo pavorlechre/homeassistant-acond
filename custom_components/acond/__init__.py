@@ -14,6 +14,7 @@ from .const import (
     HOLDING_REGISTERS_TO_POLL,
 )
 from .modbus_client import AcondModbusClient
+from .localization import async_load_localization
 from .lovelace_dashboard import async_register_dashboard, async_unregister_dashboard
 from .ai_context import (
     install_log_collector,
@@ -63,6 +64,7 @@ async def _probe_registers(client: AcondModbusClient) -> list[str]:
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Acond integration from a config entry."""
+    await async_load_localization(hass)
     host = entry.data[CONF_HOST]
     hp_series = entry.data.get(CONF_HP_SERIES, "Grandis / Economis")
 

@@ -13,6 +13,7 @@ from .const import (
     BUTTON_DEFINITIONS,
 )
 from .modbus_client import AcondModbusClient
+from .localization import text
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -101,6 +102,8 @@ class AcondButton(ButtonEntity):
        bity – bez čištění by zaseklý bit přežíval i přes přepínání režimů.
     """
 
+    _attr_has_entity_name = True
+
     def __init__(self, client, button_def, entry_id: str, hp_series: str, host: str):
         self._button_def = button_def
         self._client: AcondModbusClient = client
@@ -108,7 +111,7 @@ class AcondButton(ButtonEntity):
         self._host = host
         self._entry_id = entry_id
 
-        self._attr_name = button_def.name
+        self._attr_translation_key = button_def.key
         self._attr_unique_id = f"acond_{button_def.address}_{button_def.key}"
         # Stabilní entity_id – dashboard YAML se na něj spoléhá
         self.entity_id = f"button.acond_{button_def.address}_{button_def.key}"
@@ -241,6 +244,7 @@ class AcondAIContextButton(ButtonEntity):
 
     _attr_should_poll = False
     _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_has_entity_name = True
 
     def __init__(
         self,
@@ -257,10 +261,10 @@ class AcondAIContextButton(ButtonEntity):
         self._mode = mode  # "acond" nebo "full"
 
         if mode == "acond":
-            self._attr_name = "Export AI kontextu – jen acond"
+            self._attr_translation_key = "ai_context_acond"
             self._attr_icon = "mdi:robot-outline"
         elif mode == "full":
-            self._attr_name = "Export AI kontextu – celé HA"
+            self._attr_translation_key = "ai_context_full"
             self._attr_icon = "mdi:robot"
         else:
             raise ValueError(f"Neznámý AI context mode: {mode!r}")
@@ -304,10 +308,12 @@ class AcondAIContextButton(ButtonEntity):
             from homeassistant.components import persistent_notification
             persistent_notification.async_create(
                 self._hass,
-                message=(
-                    f"Export AI kontextu selhal:\n\n```\n{err}\n```\n\n"
-                    f"Detail najdeš v logu HA (vyhledej `acond`)."
+                message=text(
+                    self._hass, "export_error_message",
+                    "Export AI kontextu selhal:\n\n```\n{error}\n```\n\n"
+                    "Detail najdeš v logu HA (vyhledej `acond`).",
+                    error=str(err),
                 ),
-                title="❌ Acond AI kontext – chyba",
+                title=text(self._hass, "export_error_title", "❌ Acond AI kontext – chyba"),
                 notification_id=f"acond_ai_context_error_{self._mode}",
             )

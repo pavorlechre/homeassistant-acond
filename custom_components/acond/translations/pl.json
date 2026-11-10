@@ -1,0 +1,555 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Konfiguracja pompy ciepła Acond",
+        "description": "Podaj adres IP pompy ciepła i wybierz jej serię.",
+        "data": {
+          "host": "Adres IP",
+          "hp_series": "Seria pompy ciepła"
+        },
+        "data_description": {
+          "host": "Adres IP pompy ciepła w sieci lokalnej (np. 192.168.1.100)",
+          "hp_series": "Grandis / Economis — prędkość obrotowa sprężarki (obr./min)\nPRO — moc sprężarki (W)"
+        }
+      }
+    },
+    "error": {
+      "invalid_host": "Nieprawidłowy adres IP"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Ustawienia integracji Acond",
+        "description": "Tutaj możesz zmienić adres IP pompy ciepła, maksymalną temperaturę CWU i zakres suwaka sprężarki. Po zapisaniu ustawień integracja zostanie automatycznie przeładowana, a nowe wartości pojawią się na panelu.\n\nSerii pompy ciepła nie można tutaj zmienić — jej zmiana wymaga ponownej instalacji integracji.",
+        "data": {
+          "host": "Adres IP",
+          "tuv_max_temp": "Maksymalna temperatura CWU (°C)",
+          "comp_capacity_min": "Dolna granica suwaka sprężarki",
+          "comp_capacity_max": "Górna granica suwaka sprężarki"
+        },
+        "data_description": {
+          "host": "Nowy adres IP pompy ciepła w sieci lokalnej (np. 192.168.1.100)",
+          "tuv_max_temp": "Zakres 50–60°C. Domyślnie 50°C (Acond przyjmuje tę wartość bez odblokowania serwisowego). Wartości 51–60°C wymagają odblokowania pompy przez serwis.",
+          "comp_capacity_min": "Najniższa wartość dostępna na suwaku maksymalnej prędkości obrotowej lub mocy sprężarki (40014). Zakres można zawęzić lub rozszerzyć w granicach dostępnych dla danej serii.",
+          "comp_capacity_max": "Najwyższa wartość dostępna na suwaku maksymalnej prędkości obrotowej lub mocy sprężarki (40014)."
+        }
+      }
+    },
+    "error": {
+      "invalid_host": "Nieprawidłowy adres IP",
+      "comp_min_ge_max": "Dolna granica zakresu sprężarki musi być mniejsza od górnej"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "t_set_indoor1": {
+        "name": "Temperatura zadana pomieszczenia — obieg 1"
+      },
+      "t_act_indoor1": {
+        "name": "Temperatura pomieszczenia — obieg 1"
+      },
+      "t_set_indoor2": {
+        "name": "Temperatura zadana pomieszczenia — obieg 2"
+      },
+      "t_act_indoor2": {
+        "name": "Temperatura pomieszczenia — obieg 2"
+      },
+      "t_set_tuv": {
+        "name": "Temperatura zadana CWU"
+      },
+      "t_act_tuv": {
+        "name": "Temperatura CWU"
+      },
+      "tc_status": {
+        "name": "Słowo stanu pompy ciepła"
+      },
+      "t_set_water_back": {
+        "name": "Temperatura zadana powrotu"
+      },
+      "t_act_water_back": {
+        "name": "Temperatura powrotu"
+      },
+      "t_act_air": {
+        "name": "Temperatura zewnętrzna"
+      },
+      "t_act_solar": {
+        "name": "Temperatura kolektora słonecznego"
+      },
+      "t_act_pool": {
+        "name": "Temperatura basenu"
+      },
+      "t_set_pool": {
+        "name": "Temperatura zadana basenu"
+      },
+      "hp_mode": {
+        "name": "Tryb pracy pompy ciepła"
+      },
+      "regulation_type": {
+        "name": "Typ regulacji"
+      },
+      "brine_temp": {
+        "name": "Temperatura solanki"
+      },
+      "heartbeat": {
+        "name": "Licznik komunikacji Modbus"
+      },
+      "t_act_water_outlet": {
+        "name": "Temperatura zasilania ogrzewania"
+      },
+      "t_set_water_outlet": {
+        "name": "Temperatura zadana zasilania podczas chłodzenia"
+      },
+      "comp_rpm_max": {
+        "name": "Maksymalna prędkość obrotowa sprężarki"
+      },
+      "err_number": {
+        "name": "Opis błędu pompy ciepła"
+      },
+      "err_number_driver": {
+        "name": "Opis błędu sterownika sprężarki"
+      },
+      "comp_rpm_actual": {
+        "name": "Aktualna prędkość obrotowa sprężarki"
+      },
+      "actual_pwm": {
+        "name": "Prędkość pompy obiegowej"
+      },
+      "manual_pwm": {
+        "name": "Tryb ręczny pompy obiegu pierwotnego"
+      },
+      "aep": {
+        "name": "Pobór mocy elektrycznej"
+      },
+      "ahp": {
+        "name": "Moc grzewcza"
+      },
+      "cop": {
+        "name": "Współczynnik efektywności COP"
+      },
+      "t02_eh": {
+        "name": "Temperatura grzałki elektrycznej"
+      },
+      "manual_eh": {
+        "name": "Zezwolenie na pracę źródła biwalentnego"
+      },
+      "silent_mode": {
+        "name": "Tryb cichy"
+      },
+      "silent_mode_start": {
+        "name": "Początek trybu cichego — minuty od północy"
+      },
+      "silent_mode_stop": {
+        "name": "Koniec trybu cichego — minuty od północy"
+      },
+      "tes": {
+        "name": "Łączna energia cieplna"
+      },
+      "ees": {
+        "name": "Łączna energia elektryczna"
+      },
+      "ted": {
+        "name": "Energia cieplna dzisiaj"
+      },
+      "eed": {
+        "name": "Energia elektryczna dzisiaj"
+      },
+      "scop": {
+        "name": "Sezonowy współczynnik efektywności SCOP"
+      },
+      "t_act_hp": {
+        "name": "Temperatura skraplania"
+      },
+      "t_act_lp": {
+        "name": "Temperatura parowania"
+      },
+      "thermal_power": {
+        "name": "Klasa mocy pompy ciepła"
+      },
+      "hp_component_status": {
+        "name": "Słowo stanu podzespołów"
+      },
+      "fan_speed": {
+        "name": "Prędkość wentylatora"
+      },
+      "eev_steps": {
+        "name": "Położenie zaworu rozprężnego"
+      },
+      "t_act_suction": {
+        "name": "Temperatura ssania"
+      },
+      "t_act_discharge": {
+        "name": "Temperatura tłoczenia"
+      },
+      "compressor_hours": {
+        "name": "Czas pracy sprężarki — godziny"
+      },
+      "compressor_min": {
+        "name": "Czas pracy sprężarki — minuty"
+      },
+      "fan_hours": {
+        "name": "Czas pracy wentylatora — godziny"
+      },
+      "fan_min": {
+        "name": "Czas pracy wentylatora — minuty"
+      },
+      "rv_hours": {
+        "name": "Czas pracy zaworu rewersyjnego — godziny"
+      },
+      "rv_min": {
+        "name": "Czas pracy zaworu rewersyjnego — minuty"
+      },
+      "pump_hours": {
+        "name": "Czas pracy pompy obiegowej — godziny"
+      },
+      "pump_min": {
+        "name": "Czas pracy pompy obiegowej — minuty"
+      },
+      "bivalence1_hours": {
+        "name": "Czas pracy pierwszego stopnia biwalencji — godziny"
+      },
+      "bivalence1_min": {
+        "name": "Czas pracy pierwszego stopnia biwalencji — minuty"
+      },
+      "bivalence2_hours": {
+        "name": "Czas pracy drugiego stopnia biwalencji — godziny"
+      },
+      "bivalence2_min": {
+        "name": "Czas pracy drugiego stopnia biwalencji — minuty"
+      },
+      "cooling_energy": {
+        "name": "Łączna energia chłodzenia"
+      },
+      "ece": {
+        "name": "Łączna energia elektryczna chłodzenia"
+      },
+      "ced": {
+        "name": "Energia chłodzenia dzisiaj"
+      },
+      "eecd": {
+        "name": "Energia elektryczna chłodzenia dzisiaj"
+      },
+      "reset_plc": {
+        "name": "Stan restartu sterownika PLC"
+      },
+      "compressor_starts": {
+        "name": "Liczba uruchomień sprężarki"
+      },
+      "comp_rpm_max_power": {
+        "name": "Maksymalna moc sprężarki"
+      },
+      "comp_rpm_actual_power": {
+        "name": "Aktualna moc sprężarki"
+      }
+    },
+    "number": {
+      "t_set_indoor1": {
+        "name": "Temperatura zadana pomieszczenia — obieg 1"
+      },
+      "t_corr_indoor1": {
+        "name": "Temperatura pomieszczenia z czujnika zewnętrznego — obieg 1"
+      },
+      "t_set_indoor2": {
+        "name": "Temperatura zadana pomieszczenia — obieg 2"
+      },
+      "t_corr_indoor2": {
+        "name": "Temperatura pomieszczenia z czujnika zewnętrznego — obieg 2"
+      },
+      "t_set_tuv": {
+        "name": "Temperatura zadana CWU"
+      },
+      "t_set_water_back": {
+        "name": "Temperatura zadana powrotu — Standard"
+      },
+      "t_corr_air": {
+        "name": "Temperatura zewnętrzna z dodatkowego czujnika"
+      },
+      "t_corr_solar": {
+        "name": "Temperatura kolektora słonecznego z dodatkowego czujnika"
+      },
+      "t_corr_pool": {
+        "name": "Temperatura basenu z dodatkowego czujnika"
+      },
+      "t_set_pool": {
+        "name": "Temperatura zadana basenu"
+      },
+      "t_set_water_outlet": {
+        "name": "Temperatura zadana zasilania podczas chłodzenia"
+      },
+      "comp_capacity_max_set": {
+        "name": "Maksymalna prędkość obrotowa sprężarki"
+      },
+      "pwm_set": {
+        "name": "Zadana prędkość pompy obiegowej"
+      },
+      "silent_mode_start_set": {
+        "name": "Początek trybu cichego — nastawa w minutach od północy"
+      },
+      "silent_mode_stop_set": {
+        "name": "Koniec trybu cichego — nastawa w minutach od północy"
+      },
+      "comp_capacity_max_set_power": {
+        "name": "Maksymalna moc sprężarki"
+      }
+    },
+    "switch": {
+      "manual_pwm_set": {
+        "name": "Zezwolenie na ręczne sterowanie pompą obiegową"
+      },
+      "manual_eh_set": {
+        "name": "Zezwolenie na pracę źródła biwalentnego"
+      },
+      "silent_mode_set": {
+        "name": "Tryb cichy"
+      },
+      "tc_set_bit_0": {
+        "name": "Tryb automatyczny"
+      },
+      "tc_set_bit_1": {
+        "name": "Tryb samej pompy ciepła"
+      },
+      "tc_set_bit_2": {
+        "name": "Tryb samego źródła biwalentnego"
+      },
+      "tc_set_bit_3": {
+        "name": "Wyłączenie"
+      },
+      "tc_set_bit_4": {
+        "name": "Tryb chłodzenia"
+      },
+      "tc_set_bit_6": {
+        "name": "Włączenie obiegu kolektora słonecznego"
+      },
+      "tc_set_bit_7": {
+        "name": "Włączenie ogrzewania basenu"
+      }
+    },
+    "select": {
+      "sel_regulation_type": {
+        "name": "Typ regulacji"
+      }
+    },
+    "button": {
+      "tc_set_bit_5": {
+        "name": "Potwierdzenie błędu"
+      },
+      "reset_plc_set": {
+        "name": "Restart sterownika PLC — tylko dla osób uprawnionych"
+      },
+      "tc_set_bit_8": {
+        "name": "Przełączenie lato/zima"
+      },
+      "reset_t_corr_indoor1": {
+        "name": "Przywrócenie własnego czujnika pomieszczenia — obieg 1"
+      },
+      "reset_t_corr_indoor2": {
+        "name": "Przywrócenie własnego czujnika pomieszczenia — obieg 2"
+      },
+      "reset_t_corr_air": {
+        "name": "Przywrócenie własnego czujnika temperatury zewnętrznej"
+      },
+      "reset_t_corr_solar": {
+        "name": "Przywrócenie własnego czujnika kolektora słonecznego"
+      },
+      "reset_t_corr_pool": {
+        "name": "Przywrócenie własnego czujnika basenu"
+      },
+      "ai_context_acond": {
+        "name": "Eksport kontekstu AI — Acond"
+      },
+      "ai_context_full": {
+        "name": "Eksport kontekstu AI — cały Home Assistant"
+      }
+    },
+    "binary_sensor": {
+      "tc_status_bit_0": {
+        "name": "Pompa ciepła włączona"
+      },
+      "tc_status_bit_1": {
+        "name": "Pompa ciepła pracuje"
+      },
+      "tc_status_bit_2": {
+        "name": "Błąd pompy ciepła"
+      },
+      "tc_status_bit_3": {
+        "name": "Podgrzewanie CWU"
+      },
+      "tc_status_bit_4": {
+        "name": "Pompa obiegu 1"
+      },
+      "tc_status_bit_5": {
+        "name": "Pompa obiegu 2"
+      },
+      "tc_status_bit_6": {
+        "name": "Obieg kolektora słonecznego"
+      },
+      "tc_status_bit_7": {
+        "name": "Obieg basenu"
+      },
+      "tc_status_bit_8": {
+        "name": "Odszranianie"
+      },
+      "tc_status_bit_9": {
+        "name": "Źródło biwalentne"
+      },
+      "tc_status_bit_10": {
+        "name": "Tryb letni"
+      },
+      "tc_status_bit_11": {
+        "name": "Pompa solanki"
+      },
+      "tc_status_bit_12": {
+        "name": "Chłodzenie"
+      },
+      "hp_comp_bit_0": {
+        "name": "Sprężarka"
+      },
+      "hp_comp_bit_1": {
+        "name": "Wentylator"
+      },
+      "hp_comp_bit_2": {
+        "name": "Pompa obiegu pierwotnego"
+      },
+      "hp_comp_bit_3": {
+        "name": "Zawór rewersyjny"
+      }
+    }
+  },
+  "common": {
+    "export_title_acond": "🤖 Kontekst AI Acond — encje Acond",
+    "export_title_full": "🤖 Kontekst AI Acond — cały Home Assistant",
+    "export_scope_acond": "Encje, automatyzacje i urządzenia integracji Acond oraz MaR, jeśli jest zainstalowany.",
+    "export_scope_full": "Cała konfiguracja Home Assistanta — Acond i wszystkie pozostałe integracje.",
+    "export_file_created": "Utworzono plik",
+    "export_download": "Pobierz eksport",
+    "export_link_help": "Jeśli odnośnik nie działa (np. w aplikacji mobilnej HA), skopiuj adres URL i otwórz go w przeglądarce:",
+    "export_privacy": "Przed wysłaniem do AI lub na forum sprawdź zawartość. Automatyczne ukrywanie poufnych danych nie jest w pełni niezawodne. Zwróć uwagę na adresy IP i e-mail, współrzędne GPS, imiona oraz nazwy sieci.",
+    "export_error_title": "❌ Kontekst AI Acond — błąd",
+    "export_error_message": "Eksport kontekstu AI nie powiódł się:\n\n```\n{error}\n```\n\nSzczegóły znajdziesz w dzienniku HA — wyszukaj `acond`.",
+    "dashboard_title": "Pompa ciepła Acond",
+    "unknown_err_number": "Nieznany błąd {code}",
+    "unknown_err_number_driver": "Nieznany błąd sterownika sprężarki {code}",
+    "unknown_hp_mode": "Nieznany tryb {code}",
+    "unknown_regulation_type": "Nieznany typ regulacji {code}",
+    "unknown_thermal_power": "Nieznana klasa mocy {code}",
+    "state_err_number_0": "OK",
+    "state_err_number_1": "A16 – Niskie ciśnienie",
+    "state_err_number_2": "A12 – Wysokie ciśnienie",
+    "state_err_number_3": "A01 – Zbyt niska temperatura na wyjściu",
+    "state_err_number_4": "A02 – Zbyt wysoka temperatura skraplania",
+    "state_err_number_5": "A07 – Usterka sprzętowa sterownika sprężarki",
+    "state_err_number_6": "A03 – Nieprawidłowy adres IP",
+    "state_err_number_7": "A05 – Błąd systemowy sterownika sprężarki",
+    "state_err_number_9": "A13 – Zbyt długi cykl dezynfekcji CWU",
+    "state_err_number_10": "A04 – Zbyt niska temperatura powrotu",
+    "state_err_number_11": "A10 – Zbyt wysoka temperatura zasilania",
+    "state_err_number_12": "A14 – Zbyt wysoka temperatura powrotu",
+    "state_err_number_13": "A08 – Zbyt niska temperatura ssania",
+    "state_err_number_14": "A09 – Zbyt długie odszranianie",
+    "state_err_number_15": "W07 – Nadmierne otwarcie zaworu EEV",
+    "state_err_number_16": "W01 – Zbyt małe przegrzanie",
+    "state_err_number_17": "W02 – Błąd sprężarki zgłoszony przez sterownik",
+    "state_err_number_18": "W00 – Zbyt długie odszranianie",
+    "state_err_number_19": "W04 – Zbyt wiele cykli odszraniania",
+    "state_err_number_20": "W05 – Zbyt niska temperatura kolektora gruntowego",
+    "state_err_number_21": "W12 – Błąd pracy wentylatora",
+    "state_err_number_22": "W06 – Zablokowane czujniki",
+    "state_err_number_23": "HW1 – Zbyt długie podgrzewanie CWU",
+    "state_err_number_24": "W09 – Zbyt wysoka temperatura tłoczenia",
+    "state_err_number_25": "SYS – Błąd pracy sprężarki",
+    "state_err_number_26": "W11 – Zbyt wysoka temperatura ssania",
+    "state_err_number_27": "W16 – Zbyt mały przepływ przez wymiennik",
+    "state_err_number_28": "SH1 – Zbyt niska temperatura na wyjściu",
+    "state_err_number_29": "CMP – Błąd pracy sprężarki",
+    "state_err_number_30": "PFC – Błąd układu PFC sterownika",
+    "state_err_number_31": "ELC – Błąd elektroniki sterownika",
+    "state_err_number_35": "W08 – Przekroczona liczba uruchomień sprężarki",
+    "state_err_number_36": "W17 – Zbyt niska temperatura parowania",
+    "state_err_number_40": "P05 – Czujnik temperatury CWU",
+    "state_err_number_41": "P04 – Czujnik temperatury przewodu ssawnego",
+    "state_err_number_42": "P02 – Czujnik temperatury powrotu",
+    "state_err_number_43": "P06 – Czujnik temperatury parownika",
+    "state_err_number_44": "P03 – Czujnik temperatury pomieszczenia 2",
+    "state_err_number_45": "P01 – Czujnik temperatury kolektora słonecznego",
+    "state_err_number_46": "P07 – Czujnik temperatury basenu",
+    "state_err_number_47": "P09 – Czujnik temperatury pomieszczenia",
+    "state_err_number_48": "P08 – Czujnik temperatury zewnętrznej",
+    "state_err_number_49": "P10 – Czujnik temperatury zasilania",
+    "state_err_number_50": "PER – Utrata komunikacji z urządzeniami peryferyjnymi",
+    "state_err_number_51": "P11 – Czujnik temperatury zaworu mieszającego",
+    "state_err_number_52": "P15 – Czujnik niskiego ciśnienia",
+    "state_err_number_53": "P16 – Czujnik wysokiego ciśnienia",
+    "state_err_number_54": "P13 – Czujnik temperatury tłoczenia",
+    "state_err_number_55": "P17 – Drugi czujnik temperatury CWU",
+    "state_err_number_56": "A19 – Zbyt długie podgrzewanie CWU 2",
+    "state_err_number_60": "A18 – Zbyt niska temperatura ssania lub niskie ciśnienie podczas odszraniania",
+    "state_err_number_61": "A11 – Błąd komunikacji ze sterownikiem sprężarki",
+    "state_err_number_62": "A15 – Przegrzanie IGBT sterownika",
+    "state_err_number_63": "P99 – Blokada z powodu braku płatności",
+    "state_err_number_64": "W00 – OK",
+    "state_err_number_90": "W10 – Zbyt mały przepływ podczas odszraniania lub chłodzenia",
+    "state_err_number_91": "W14 – Zbyt duża różnica temperatur powrotu i CWU",
+    "state_err_number_92": "W13 – Zbyt wiele restartów PLC",
+    "state_err_number_93": "W15 – Błąd karty SD",
+    "state_err_number_94": "A17 – Zbyt niska temperatura zbiornika akumulacyjnego",
+    "state_err_number_95": "ST1 – Niekrytyczna usterka w pomieszczeniu technicznym",
+    "state_err_number_96": "ST2 – Poważna usterka w pomieszczeniu technicznym",
+    "state_err_number_driver_0": "OK",
+    "state_err_number_driver_1": "Zablokowany przekaźnik",
+    "state_err_number_driver_2": "Błąd czujnika temperatury tłoczenia DLT",
+    "state_err_number_driver_3": "Utrata komunikacji",
+    "state_err_number_driver_4": "EEPROM",
+    "state_err_number_driver_5": "Nadmierny prąd AC",
+    "state_err_number_driver_6": "Zbyt wysokie napięcie AC",
+    "state_err_number_driver_7": "Błąd czujnika prądu fazy U sprężarki",
+    "state_err_number_driver_8": "Błąd czujnika prądu fazy V sprężarki",
+    "state_err_number_driver_9": "Błąd czujnika prądu fazy W sprężarki",
+    "state_err_number_driver_10": "Błąd czujnika prądu PFC",
+    "state_err_number_driver_11": "Błąd czujnika temperatury IPM",
+    "state_err_number_driver_12": "Błąd czujnika temperatury PFC",
+    "state_err_number_driver_13": "Przegrzanie IPM",
+    "state_err_number_driver_14": "Przegrzanie IGBT",
+    "state_err_number_driver_15": "Błąd kodu sprężarki",
+    "state_err_number_driver_16": "Sprzętowe zabezpieczenie nadprądowe sprężarki",
+    "state_err_number_driver_17": "Zbyt niskie napięcie AC",
+    "state_err_number_driver_18": "Zbyt wysokie napięcie DC",
+    "state_err_number_driver_19": "Zbyt niskie napięcie DC",
+    "state_err_number_driver_20": "Presostat wysokiego lub niskiego ciśnienia",
+    "state_err_number_driver_21": "Zanik fazy zasilania",
+    "state_err_number_driver_22": "Nadmierny prąd fazy U sprężarki",
+    "state_err_number_driver_23": "Przeciążenie sprężarki",
+    "state_err_number_driver_24": "Zbyt wysoka temperatura tłoczenia sprężarki DLT",
+    "state_err_number_driver_25": "Zabezpieczenie IPM sprężarki przed wyjściem z nasycenia",
+    "state_err_number_driver_26": "Nadmierny prąd fazy V sprężarki",
+    "state_err_number_driver_27": "Nadmierny prąd fazy W sprężarki",
+    "state_err_number_driver_28": "Zanik fazy sprężarki",
+    "state_err_number_driver_29": "Utrata synchronizacji wirnika sprężarki",
+    "state_err_number_driver_30": "Nieudane uruchomienie sprężarki",
+    "state_err_number_driver_31": "Błąd A AD",
+    "state_err_number_driver_32": "Nieprawidłowe adresowanie A",
+    "state_err_number_driver_33": "Błąd komunikacji Modbus VSS",
+    "state_err_number_driver_34": "Utrata synchronizacji wirnika sprężarki 2",
+    "state_err_number_driver_35": "Utrata synchronizacji wirnika sprężarki 3",
+    "state_err_number_driver_36": "Sprzętowe zabezpieczenie nadprądowe PFC",
+    "state_err_number_driver_37": "Programowe zabezpieczenie nadprądowe PFC",
+    "state_err_number_driver_38": "Zbyt wysokie napięcie PFC",
+    "state_err_number_driver_39": "Nie dotyczy",
+    "state_hp_mode_0": "Automatyczny",
+    "state_hp_mode_1": "Tylko pompa ciepła",
+    "state_hp_mode_3": "Tylko źródło biwalentne",
+    "state_hp_mode_4": "Wyłączona",
+    "state_hp_mode_5": "Ręczny",
+    "state_hp_mode_6": "Chłodzenie",
+    "state_regulation_type_0": "AcondTherm",
+    "state_regulation_type_1": "Pogodowa",
+    "state_regulation_type_2": "Standard",
+    "state_thermal_power_1": "12 kW",
+    "state_thermal_power_2": "5 kW",
+    "state_thermal_power_6": "20 kW",
+    "state_silent_mode_0": "Wyłączony",
+    "state_silent_mode_1": "Włączony",
+    "unknown_silent_mode": "Nieznany stan {code}",
+    "invalid_silent_time": "Poza zakresem integracji: {minutes} min"
+  }
+}

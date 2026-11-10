@@ -1425,17 +1425,38 @@ def _async_send_notification(
     přes /api/... nefungoval spolehlivě v mobilní aplikaci).
     """
     from homeassistant.components import persistent_notification
+    from .localization import text
 
     url = download_url(hass, filename)
     size_kb = size_bytes / 1024
 
     if mode == "acond":
-        title = "🤖 Acond AI kontext – jen acond entity"
-        scope_note = ("Entity, automatizace a zařízení integrace Acond "
-                      "(a doplňku MaR, je-li nainstalován).")
+        title = text(hass, "export_title_acond", "🤖 Acond AI kontext – jen acond entity")
+        scope_note = text(
+            hass, "export_scope_acond",
+            "Entity, automatizace a zařízení integrace Acond "
+            "(a doplňku MaR, je-li nainstalován).",
+        )
     else:
-        title = "🤖 Acond AI kontext – kompletní HA"
-        scope_note = "Celá HA konfigurace (acond + všechny ostatní integrace)."
+        title = text(hass, "export_title_full", "🤖 Acond AI kontext – kompletní HA")
+        scope_note = text(
+            hass, "export_scope_full",
+            "Celá HA konfigurace (acond + všechny ostatní integrace).",
+        )
+
+    created_label = text(hass, "export_file_created", "Soubor vytvořen")
+    download_label = text(hass, "export_download", "Stáhnout export")
+    link_help = text(
+        hass, "export_link_help",
+        "Pokud klik nereaguje (např. v mobilní HA aplikaci), zkopíruj URL "
+        "a otevři ji v prohlížeči:",
+    )
+    privacy_note = text(
+        hass, "export_privacy",
+        "Před odesláním do AI nebo na fórum zkontroluj obsah – "
+        "automatická redakce zachytí běžné secrets, ale není 100% spolehlivá. "
+        "Pozor zejména na IP adresy, e-maily, GPS, jména a názvy sítí.",
+    )
 
     # HTML <a target="_blank"> místo markdown linku –
     # 1) Markdown link `[text](url)` zachytává frontend HA a v některých
@@ -1445,15 +1466,12 @@ def _async_send_notification(
     # 3) Druhý prostý URL pod ním je fallback pro klienty, kde sanitizér
     #    HTML stripuje – uživatel ho může zkopírovat ručně.
     message = (
-        f"**Soubor vytvořen:** `{filename}` ({size_kb:.1f} kB)\n\n"
-        f'### <a href="{url}" target="_blank" rel="noopener">📥 Stáhnout export</a>\n\n'
-        f"_Pokud klik nereaguje (např. v mobilní HA aplikaci), zkopíruj URL "
-        f"a otevři ji v prohlížeči:_\n\n"
+        f"**{created_label}:** `{filename}` ({size_kb:.1f} kB)\n\n"
+        f'### <a href="{url}" target="_blank" rel="noopener">📥 {download_label}</a>\n\n'
+        f"_{link_help}_\n\n"
         f"`{url}`\n\n"
         f"_{scope_note}_\n\n"
-        f"⚠️ **Před odesláním do AI nebo na fórum zkontroluj obsah** – "
-        f"automatická redakce zachytí běžné secrets, ale není 100% spolehlivá. "
-        f"Pozor zejména na IP adresy, e-maily, GPS, jména a názvy sítí."
+        f"⚠️ {privacy_note}"
     )
 
     persistent_notification.async_create(

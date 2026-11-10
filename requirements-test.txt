@@ -1,0 +1,8 @@
+# Offline localization tests on the integration's documented minimum HA series.
+homeassistant==2024.11.3
+# Compatible with the ACME dependency used by this older HA release.
+josepy==1.14.0
+pymodbus==3.6.9
+pytest==8.3.3
+pytest-asyncio==0.24.0
+PyYAML==6.0.2

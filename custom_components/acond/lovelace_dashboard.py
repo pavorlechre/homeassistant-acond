@@ -43,6 +43,8 @@ from pathlib import Path
 
 from homeassistant.components import frontend
 from homeassistant.core import HomeAssistant
+from .localization import localize_dashboard, text
+from .frontend_readability import async_register_readability
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -187,7 +189,7 @@ async def _addon_views(hass: HomeAssistant, addon: dict) -> list[dict]:
         )
         break
 
-    return [_teaser_view(addon)]
+    return [localize_dashboard(hass, _teaser_view(addon))]
 
 
 def _normalize_sections(data) -> list[dict]:
@@ -329,6 +331,8 @@ async def _compose_dashboard(
         )
         return base_path
 
+    # Localize the base before inserting add-on content owned by another project.
+    config = localize_dashboard(hass, config)
     views = config.get("views")
     if not isinstance(views, list):
         views = []
@@ -382,6 +386,7 @@ async def _compose_dashboard(
 
 async def async_register_dashboard(hass: HomeAssistant) -> None:
     """Registruj Acond dashboard jako postranní panel."""
+    await async_register_readability(hass)
     lovelace_dir = Path(__file__).parent / "lovelace"
     base_path = lovelace_dir / BASE_YAML_FILENAME
 
@@ -436,7 +441,7 @@ async def async_register_dashboard(hass: HomeAssistant) -> None:
     dashboard_config = {
         "mode": "yaml",
         "filename": str(dashboard_path),
-        "title": DASHBOARD_TITLE,
+        "title": text(hass, "dashboard_title", DASHBOARD_TITLE),
         "icon": DASHBOARD_ICON,
         "show_in_sidebar": True,
         "require_admin": False,
@@ -459,7 +464,7 @@ async def async_register_dashboard(hass: HomeAssistant) -> None:
         frontend.async_register_built_in_panel(
             hass,
             component_name="lovelace",
-            sidebar_title=DASHBOARD_TITLE,
+            sidebar_title=text(hass, "dashboard_title", DASHBOARD_TITLE),
             sidebar_icon=DASHBOARD_ICON,
             frontend_url_path=DASHBOARD_URL_PATH,
             config={"mode": "yaml"},

@@ -7,6 +7,8 @@
 
 > 🇨🇿 **Tato dokumentace je dostupná i v češtině:** [README.cs.md](README.cs.md)
 
+> 🇵🇱 **Polska dokumentacja i zakres lokalizacji:** [README.pl.md](README.pl.md)
+
 ---
 
 ## ⚠️ Beta Release

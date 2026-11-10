@@ -139,6 +139,8 @@ async def async_setup_entry(
 class AcondBitSensor(CoordinatorEntity, BinarySensorEntity):
     """Binární senzor z jednoho bitu Modbus word registru."""
 
+    _attr_has_entity_name = True
+
     def __init__(
         self,
         coordinator,
@@ -160,7 +162,7 @@ class AcondBitSensor(CoordinatorEntity, BinarySensorEntity):
         self._register_key = register_key
         self._bit = bit
 
-        self._attr_name = name
+        self._attr_translation_key = key
         self._attr_unique_id = f"acond_{register_address}_{key}"
         self._attr_device_class = device_class
         # Stabilní entity_id – dashboard YAML se na něj spoléhá

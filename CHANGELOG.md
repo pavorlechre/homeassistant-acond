@@ -10,6 +10,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Nevydáno / Unreleased]
 
+### Localization
+
+- Add Polish setup/options forms, entity names, export notifications and the
+  base dashboard, including help and confirmations.
+- Use Home Assistant entity translation keys with complete English and Czech
+  fallback catalogs; preserve all existing entity IDs, native states and options.
+- Add display-only `localized_state` attributes and Polish regulation buttons
+  that send the original API options. MaR contributions remain owned by MaR.
+- Add offline localization and compatibility tests; see `docs/localization.md`
+  for the native-state compatibility boundary and system-language behavior.
+- Wrap long Polish dashboard labels, headings and chart legends using a bundled,
+  scoped frontend module. Translate help comments and descriptive example text;
+  display text states through supported native attribute rows.
+- Keep Markdown table wrapping across rerenders and fit all columns inside cards.
+  Display quiet-mode flags and valid clock times without changing minute-based
+  native values or write methods; flag out-of-range presentation values.
+
 Připravuje se jako 0.3.0 (testovací verze 0.3.0b1–b5).
 Being prepared as 0.3.0 (test versions 0.3.0b1–b5).
 

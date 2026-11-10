@@ -15,6 +15,7 @@ from .const import (
 )
 from .modbus_client import AcondModbusClient
 from ._pending_helper import PendingValue
+from .localization import localized_state
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -64,6 +65,8 @@ class AcondSelect(CoordinatorEntity, SelectEntity):
     write je krátkodobě překryto pending value pro okamžitý feedback.
     """
 
+    _attr_has_entity_name = True
+
     def __init__(self, coordinator, client, select_def, entry_id: str, hp_series: str, host: str):
         super().__init__(coordinator)
         self._select_def = select_def
@@ -73,7 +76,7 @@ class AcondSelect(CoordinatorEntity, SelectEntity):
         self._entry_id = entry_id
         self._pending = PendingValue(timeout=_PENDING_TIMEOUT)
 
-        self._attr_name = select_def.name
+        self._attr_translation_key = select_def.key
         self._attr_unique_id = f"acond_{select_def.address}_{select_def.key}"
         # Stabilní entity_id – dashboard YAML se na něj spoléhá
         self.entity_id = f"select.acond_{select_def.address}_{select_def.key}"
@@ -101,6 +104,10 @@ class AcondSelect(CoordinatorEntity, SelectEntity):
         current = self.current_option
         if current is not None:
             attrs["raw_value"] = self._options_inv.get(current)
+            if attrs["raw_value"] is not None:
+                attrs["localized_state"] = localized_state(
+                    self.hass, "regulation_type", attrs["raw_value"], current
+                )
         return attrs
 
     @property

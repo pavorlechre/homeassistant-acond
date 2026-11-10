@@ -2,44 +2,554 @@
   "config": {
     "step": {
       "user": {
-        "title": "Nastavení Acond tepelného čerpadla",
-        "description": "Zadejte IP adresu tepelného čerpadla a vyberte sérii.",
+        "title": "Acond Heat Pump Setup",
+        "description": "Enter the IP address of your heat pump and select the series.",
         "data": {
-          "host": "IP adresa",
-          "hp_series": "Série tepelného čerpadla"
+          "host": "IP Address",
+          "hp_series": "Heat pump series"
         },
         "data_description": {
-          "host": "IP adresa tepelného čerpadla v síti (např. 192.168.1.100)",
-          "hp_series": "Grandis / Economis = otáčky kompresoru (rpm)\nPRO = výkon kompresoru (W)"
+          "host": "IP address of the heat pump on your network (e.g. 192.168.1.100)",
+          "hp_series": "Grandis / Economis = compressor speed (rpm)\nPRO = compressor power (W)"
         }
       }
     },
     "error": {
-      "invalid_host": "Neplatná IP adresa"
+      "invalid_host": "Invalid IP address"
     }
   },
   "options": {
     "step": {
       "init": {
-        "title": "Nastavení integrace Acond",
-        "description": "Zde můžete upravit IP adresu tepelného čerpadla, maximální teplotu TUV a rozsah slideru kompresoru. Po uložení se integrace automaticky reloadne a nové hodnoty se okamžitě projeví v dashboardu.\n\nSérie tepelného čerpadla není editovatelná – pro její změnu je nutná reinstalace.",
+        "title": "Acond integration settings",
+        "description": "Here you can edit the heat pump IP address, the maximum DHW temperature, and the compressor slider range. After saving, the integration reloads automatically and new values take effect immediately in the dashboard.\n\nHeat pump series cannot be edited – changing it requires a reinstall.",
         "data": {
-          "host": "IP adresa",
-          "tuv_max_temp": "Maximální teplota TUV (°C)",
-          "comp_capacity_min": "Minimum slideru kompresoru",
-          "comp_capacity_max": "Maximum slideru kompresoru"
+          "host": "IP Address",
+          "tuv_max_temp": "Maximum DHW temperature (°C)",
+          "comp_capacity_min": "Compressor slider minimum",
+          "comp_capacity_max": "Compressor slider maximum"
         },
         "data_description": {
-          "host": "Nová IP adresa tepelného čerpadla v síti (např. 192.168.1.100)",
-          "tuv_max_temp": "Rozsah 50–60 °C. Default 50 °C (Acond v praxi přijme bez servisního zásahu). Hodnoty 51–60 vyžadují servisní odemčení tepelného čerpadla.",
-          "comp_capacity_min": "Nejnižší hodnota, kterou půjde nastavit slider Max. otáček/výkonu kompresoru (40014). Lze zúžit pro ochranu nebo rozšířit pro servisně odemčený rozsah.",
-          "comp_capacity_max": "Nejvyšší hodnota, kterou půjde nastavit slider Max. otáček/výkonu kompresoru (40014)."
+          "host": "New IP address of the heat pump on your network (e.g. 192.168.1.100)",
+          "tuv_max_temp": "Range 50–60 °C. Default 50 °C (Acond accepts this without any service unlock). Values 51–60 require service-unlocked heat pump.",
+          "comp_capacity_min": "Lowest value selectable on the compressor max speed/power slider (40014). Can be narrowed for safety or widened for service-unlocked range.",
+          "comp_capacity_max": "Highest value selectable on the compressor max speed/power slider (40014)."
         }
       }
     },
     "error": {
-      "invalid_host": "Neplatná IP adresa",
-      "comp_min_ge_max": "Minimum kompresoru musí být menší než maximum"
+      "invalid_host": "Invalid IP address",
+      "comp_min_ge_max": "Compressor minimum must be lower than maximum"
     }
+  },
+  "entity": {
+    "sensor": {
+      "t_set_indoor1": {
+        "name": "Room temperature setpoint, circuit 1"
+      },
+      "t_act_indoor1": {
+        "name": "Room temperature, circuit 1"
+      },
+      "t_set_indoor2": {
+        "name": "Room temperature setpoint, circuit 2"
+      },
+      "t_act_indoor2": {
+        "name": "Room temperature, circuit 2"
+      },
+      "t_set_tuv": {
+        "name": "DHW temperature setpoint"
+      },
+      "t_act_tuv": {
+        "name": "DHW temperature"
+      },
+      "tc_status": {
+        "name": "Heat pump status word"
+      },
+      "t_set_water_back": {
+        "name": "Return water temperature setpoint"
+      },
+      "t_act_water_back": {
+        "name": "Return water temperature"
+      },
+      "t_act_air": {
+        "name": "Outdoor temperature"
+      },
+      "t_act_solar": {
+        "name": "Solar collector temperature"
+      },
+      "t_act_pool": {
+        "name": "Pool temperature"
+      },
+      "t_set_pool": {
+        "name": "Pool temperature setpoint"
+      },
+      "hp_mode": {
+        "name": "Heat pump operating mode"
+      },
+      "regulation_type": {
+        "name": "Regulation type"
+      },
+      "brine_temp": {
+        "name": "Brine temperature"
+      },
+      "heartbeat": {
+        "name": "Modbus communication counter"
+      },
+      "t_act_water_outlet": {
+        "name": "Heating water supply temperature"
+      },
+      "t_set_water_outlet": {
+        "name": "Cooling outlet temperature setpoint"
+      },
+      "comp_rpm_max": {
+        "name": "Maximum compressor speed"
+      },
+      "err_number": {
+        "name": "Heat pump fault description"
+      },
+      "err_number_driver": {
+        "name": "Compressor drive fault description"
+      },
+      "comp_rpm_actual": {
+        "name": "Current compressor speed"
+      },
+      "actual_pwm": {
+        "name": "Circulation pump speed"
+      },
+      "manual_pwm": {
+        "name": "Primary pump manual mode"
+      },
+      "aep": {
+        "name": "Electrical input power"
+      },
+      "ahp": {
+        "name": "Heating output power"
+      },
+      "cop": {
+        "name": "Coefficient of performance COP"
+      },
+      "t02_eh": {
+        "name": "Electric heater temperature"
+      },
+      "manual_eh": {
+        "name": "Bivalence enabled"
+      },
+      "silent_mode": {
+        "name": "Quiet mode"
+      },
+      "silent_mode_start": {
+        "name": "Quiet mode start (minutes after midnight)"
+      },
+      "silent_mode_stop": {
+        "name": "Quiet mode end (minutes after midnight)"
+      },
+      "tes": {
+        "name": "Total thermal energy"
+      },
+      "ees": {
+        "name": "Total electrical energy"
+      },
+      "ted": {
+        "name": "Thermal energy today"
+      },
+      "eed": {
+        "name": "Electrical energy today"
+      },
+      "scop": {
+        "name": "Seasonal coefficient of performance SCOP"
+      },
+      "t_act_hp": {
+        "name": "Condensing temperature"
+      },
+      "t_act_lp": {
+        "name": "Evaporating temperature"
+      },
+      "thermal_power": {
+        "name": "Heat pump power class"
+      },
+      "hp_component_status": {
+        "name": "Component status word"
+      },
+      "fan_speed": {
+        "name": "Fan speed"
+      },
+      "eev_steps": {
+        "name": "Expansion valve position"
+      },
+      "t_act_suction": {
+        "name": "Suction temperature"
+      },
+      "t_act_discharge": {
+        "name": "Discharge temperature"
+      },
+      "compressor_hours": {
+        "name": "Compressor operating hours"
+      },
+      "compressor_min": {
+        "name": "Compressor operating minutes"
+      },
+      "fan_hours": {
+        "name": "Fan operating hours"
+      },
+      "fan_min": {
+        "name": "Fan operating minutes"
+      },
+      "rv_hours": {
+        "name": "Reversing valve operating hours"
+      },
+      "rv_min": {
+        "name": "Reversing valve operating minutes"
+      },
+      "pump_hours": {
+        "name": "Circulation pump operating hours"
+      },
+      "pump_min": {
+        "name": "Circulation pump operating minutes"
+      },
+      "bivalence1_hours": {
+        "name": "Bivalence stage 1 operating hours"
+      },
+      "bivalence1_min": {
+        "name": "Bivalence stage 1 operating minutes"
+      },
+      "bivalence2_hours": {
+        "name": "Bivalence stage 2 operating hours"
+      },
+      "bivalence2_min": {
+        "name": "Bivalence stage 2 operating minutes"
+      },
+      "cooling_energy": {
+        "name": "Total cooling energy"
+      },
+      "ece": {
+        "name": "Total cooling electrical energy"
+      },
+      "ced": {
+        "name": "Cooling energy today"
+      },
+      "eecd": {
+        "name": "Cooling electrical energy today"
+      },
+      "reset_plc": {
+        "name": "PLC reset status"
+      },
+      "compressor_starts": {
+        "name": "Compressor starts"
+      },
+      "comp_rpm_max_power": {
+        "name": "Maximum compressor power"
+      },
+      "comp_rpm_actual_power": {
+        "name": "Current compressor power"
+      }
+    },
+    "number": {
+      "t_set_indoor1": {
+        "name": "Room temperature setpoint, circuit 1"
+      },
+      "t_corr_indoor1": {
+        "name": "External room temperature, circuit 1"
+      },
+      "t_set_indoor2": {
+        "name": "Room temperature setpoint, circuit 2"
+      },
+      "t_corr_indoor2": {
+        "name": "External room temperature, circuit 2"
+      },
+      "t_set_tuv": {
+        "name": "DHW temperature setpoint"
+      },
+      "t_set_water_back": {
+        "name": "Return water temperature setpoint (Standard)"
+      },
+      "t_corr_air": {
+        "name": "External outdoor temperature"
+      },
+      "t_corr_solar": {
+        "name": "External solar collector temperature"
+      },
+      "t_corr_pool": {
+        "name": "External pool temperature"
+      },
+      "t_set_pool": {
+        "name": "Pool temperature setpoint"
+      },
+      "t_set_water_outlet": {
+        "name": "Cooling outlet temperature setpoint"
+      },
+      "comp_capacity_max_set": {
+        "name": "Maximum compressor speed"
+      },
+      "pwm_set": {
+        "name": "Circulation pump speed setpoint"
+      },
+      "silent_mode_start_set": {
+        "name": "Quiet mode start setpoint (minutes after midnight)"
+      },
+      "silent_mode_stop_set": {
+        "name": "Quiet mode end setpoint (minutes after midnight)"
+      },
+      "comp_capacity_max_set_power": {
+        "name": "Maximum compressor power"
+      }
+    },
+    "switch": {
+      "manual_pwm_set": {
+        "name": "Enable circulation pump manual control"
+      },
+      "manual_eh_set": {
+        "name": "Enable bivalent heat source"
+      },
+      "silent_mode_set": {
+        "name": "Quiet mode"
+      },
+      "tc_set_bit_0": {
+        "name": "Automatic mode"
+      },
+      "tc_set_bit_1": {
+        "name": "Heat pump only mode"
+      },
+      "tc_set_bit_2": {
+        "name": "Bivalent heat source only mode"
+      },
+      "tc_set_bit_3": {
+        "name": "Off"
+      },
+      "tc_set_bit_4": {
+        "name": "Cooling mode"
+      },
+      "tc_set_bit_6": {
+        "name": "Solar thermal circuit enabled"
+      },
+      "tc_set_bit_7": {
+        "name": "Pool heating enabled"
+      }
+    },
+    "select": {
+      "sel_regulation_type": {
+        "name": "Regulation type"
+      }
+    },
+    "button": {
+      "tc_set_bit_5": {
+        "name": "Acknowledge fault"
+      },
+      "reset_plc_set": {
+        "name": "Reset PLC (service personnel only)"
+      },
+      "tc_set_bit_8": {
+        "name": "Toggle summer/winter mode"
+      },
+      "reset_t_corr_indoor1": {
+        "name": "Use internal room sensor, circuit 1"
+      },
+      "reset_t_corr_indoor2": {
+        "name": "Use internal room sensor, circuit 2"
+      },
+      "reset_t_corr_air": {
+        "name": "Use internal outdoor sensor"
+      },
+      "reset_t_corr_solar": {
+        "name": "Use internal solar collector sensor"
+      },
+      "reset_t_corr_pool": {
+        "name": "Use internal pool sensor"
+      },
+      "ai_context_acond": {
+        "name": "Export AI context (Acond)"
+      },
+      "ai_context_full": {
+        "name": "Export AI context (full HA)"
+      }
+    },
+    "binary_sensor": {
+      "tc_status_bit_0": {
+        "name": "Heat pump enabled"
+      },
+      "tc_status_bit_1": {
+        "name": "Heat pump running"
+      },
+      "tc_status_bit_2": {
+        "name": "Heat pump fault"
+      },
+      "tc_status_bit_3": {
+        "name": "DHW heating"
+      },
+      "tc_status_bit_4": {
+        "name": "Circuit 1 pump"
+      },
+      "tc_status_bit_5": {
+        "name": "Circuit 2 pump"
+      },
+      "tc_status_bit_6": {
+        "name": "Solar thermal circulation"
+      },
+      "tc_status_bit_7": {
+        "name": "Pool circulation"
+      },
+      "tc_status_bit_8": {
+        "name": "Defrosting"
+      },
+      "tc_status_bit_9": {
+        "name": "Bivalent heat source"
+      },
+      "tc_status_bit_10": {
+        "name": "Summer mode"
+      },
+      "tc_status_bit_11": {
+        "name": "Brine pump"
+      },
+      "tc_status_bit_12": {
+        "name": "Cooling"
+      },
+      "hp_comp_bit_0": {
+        "name": "Compressor"
+      },
+      "hp_comp_bit_1": {
+        "name": "Fan"
+      },
+      "hp_comp_bit_2": {
+        "name": "Primary circulation pump"
+      },
+      "hp_comp_bit_3": {
+        "name": "Reversing valve"
+      }
+    }
+  },
+  "common": {
+    "export_title_acond": "🤖 Acond AI context — Acond entities",
+    "export_title_full": "🤖 Acond AI context — full Home Assistant",
+    "export_scope_acond": "Entities, automations and devices of Acond (and MaR, if installed).",
+    "export_scope_full": "The complete Home Assistant configuration (Acond and all other integrations).",
+    "export_file_created": "File created",
+    "export_download": "Download export",
+    "export_link_help": "If the link does not respond (for example in the mobile app), copy the URL and open it in a browser:",
+    "export_privacy": "Check the contents before sharing with AI or on a forum. Automatic redaction catches common secrets, but is not completely reliable. Pay particular attention to IP addresses, emails, GPS coordinates, names and network names.",
+    "export_error_title": "❌ Acond AI context — error",
+    "export_error_message": "AI context export failed:\n\n```\n{error}\n```\n\nSee the HA log for details (search for `acond`).",
+    "dashboard_title": "Acond heat pump",
+    "unknown_err_number": "Unknown fault {code}",
+    "unknown_err_number_driver": "Unknown drive fault {code}",
+    "unknown_hp_mode": "Unknown mode {code}",
+    "unknown_regulation_type": "Unknown regulation {code}",
+    "unknown_thermal_power": "Unknown power class {code}",
+    "state_err_number_0": "OK",
+    "state_err_number_1": "A16 – Low pressure",
+    "state_err_number_2": "A12 – High pressure",
+    "state_err_number_3": "A01 – Outlet temperature low",
+    "state_err_number_4": "A02 – Condensing temperature high",
+    "state_err_number_5": "A07 – Driver hardware fault",
+    "state_err_number_6": "A03 – IP address is not valid",
+    "state_err_number_7": "A05 – Driver system fault",
+    "state_err_number_9": "A13 – DHW sanitation too long",
+    "state_err_number_10": "A04 – Return water temperature low",
+    "state_err_number_11": "A10 – Outlet water temperature high",
+    "state_err_number_12": "A14 – Return water temperature high",
+    "state_err_number_13": "A08 – Suction temperature low",
+    "state_err_number_14": "A09 – Defrosting too long",
+    "state_err_number_15": "W07 – EEV too open",
+    "state_err_number_16": "W01 – Superheat low",
+    "state_err_number_17": "W02 – Driver compressor fault",
+    "state_err_number_18": "W00 – Defrosting too long",
+    "state_err_number_19": "W04 – Too many defrosts",
+    "state_err_number_20": "W05 – Ground collector temp low",
+    "state_err_number_21": "W12 – Fan running fault",
+    "state_err_number_22": "W06 – Sensors blocked",
+    "state_err_number_23": "HW1 – Heating DHW too long",
+    "state_err_number_24": "W09 – Discharge temperature high",
+    "state_err_number_25": "SYS – Compressor running fault",
+    "state_err_number_26": "W11 – Suction temperature high",
+    "state_err_number_27": "W16 – Flow through heat exchanger low",
+    "state_err_number_28": "SH1 – Outlet temperature low",
+    "state_err_number_29": "CMP – Compressor running fault",
+    "state_err_number_30": "PFC – Driver PFC fault",
+    "state_err_number_31": "ELC – Driver microelectronics fault",
+    "state_err_number_35": "W08 – Max number of comp starts",
+    "state_err_number_36": "W17 – Evaporating temperature low",
+    "state_err_number_40": "P05 – Domestic hot water sensor",
+    "state_err_number_41": "P04 – Suction line temp sensor",
+    "state_err_number_42": "P02 – Return water temp sensor",
+    "state_err_number_43": "P06 – Evaporator temperature sensor",
+    "state_err_number_44": "P03 – Room 2 temperature sensor",
+    "state_err_number_45": "P01 – Solar collector temp sensor",
+    "state_err_number_46": "P07 – Pool temperature sensor",
+    "state_err_number_47": "P09 – Room temperature sensor",
+    "state_err_number_48": "P08 – Outdoor temperature sensor",
+    "state_err_number_49": "P10 – Outlet water temp sensor",
+    "state_err_number_50": "PER – Communication with perif lost",
+    "state_err_number_51": "P11 – Mixing valve temperature sensor",
+    "state_err_number_52": "P15 – Low pressure sensor",
+    "state_err_number_53": "P16 – High pressure sensor",
+    "state_err_number_54": "P13 – Discharge line temp sensor",
+    "state_err_number_55": "P17 – Domestic hot water sensor 2",
+    "state_err_number_56": "A19 – Heating DHW too long 2",
+    "state_err_number_60": "A18 – Suction temp or LP during defrost low",
+    "state_err_number_61": "A11 – ERR communication with driver",
+    "state_err_number_62": "A15 – IGBT overheat (driver)",
+    "state_err_number_63": "P99 – Blocked – unpaid",
+    "state_err_number_64": "W00 – OK",
+    "state_err_number_90": "W10 – Low flow during defrost/cooling",
+    "state_err_number_91": "W14 – Big difference return and DHW temperature",
+    "state_err_number_92": "W13 – Too many restarts of PLC",
+    "state_err_number_93": "W15 – SD card fault",
+    "state_err_number_94": "A17 – Temperature of storage tank low",
+    "state_err_number_95": "ST1 – Soft fault in the engine room",
+    "state_err_number_96": "ST2 – Serious fault in the engine room",
+    "state_err_number_driver_0": "OK",
+    "state_err_number_driver_1": "Stuck relay",
+    "state_err_number_driver_2": "DLT temperature sensor fault",
+    "state_err_number_driver_3": "Communication lost",
+    "state_err_number_driver_4": "EEPROM",
+    "state_err_number_driver_5": "AC overcurrent",
+    "state_err_number_driver_6": "AC overvoltage",
+    "state_err_number_driver_7": "Comp U current sensor fault",
+    "state_err_number_driver_8": "Comp V current sensor fault",
+    "state_err_number_driver_9": "Comp W current sensor fault",
+    "state_err_number_driver_10": "PFC current sensor fault",
+    "state_err_number_driver_11": "IPM temperature sensor fault",
+    "state_err_number_driver_12": "PFC temperature sensor fault",
+    "state_err_number_driver_13": "IPM overheat",
+    "state_err_number_driver_14": "IGBT overheat",
+    "state_err_number_driver_15": "Compressor code fault",
+    "state_err_number_driver_16": "Compressor HW overcurrent",
+    "state_err_number_driver_17": "AC undervoltage",
+    "state_err_number_driver_18": "DC overvoltage",
+    "state_err_number_driver_19": "DC undervoltage",
+    "state_err_number_driver_20": "HP/LP switch",
+    "state_err_number_driver_21": "Input loss of phase fault",
+    "state_err_number_driver_22": "Compressor U phase overcurrent",
+    "state_err_number_driver_23": "Compressor overload",
+    "state_err_number_driver_24": "Compressor DLT over temperature",
+    "state_err_number_driver_25": "Compressor IPM desat protection",
+    "state_err_number_driver_26": "Compressor V phase overcurrent",
+    "state_err_number_driver_27": "Compressor W phase overcurrent",
+    "state_err_number_driver_28": "Compressor loss of phase",
+    "state_err_number_driver_29": "Compressor lost rotor",
+    "state_err_number_driver_30": "Compressor startup failure",
+    "state_err_number_driver_31": "A AD fault",
+    "state_err_number_driver_32": "A wrong addressing",
+    "state_err_number_driver_33": "Modbus VSS communication fault",
+    "state_err_number_driver_34": "Compressor lost rotor 2",
+    "state_err_number_driver_35": "Compressor lost rotor 3",
+    "state_err_number_driver_36": "PFC HW overcurrent",
+    "state_err_number_driver_37": "PFC SW overcurrent",
+    "state_err_number_driver_38": "PFC overvoltage",
+    "state_err_number_driver_39": "n/a",
+    "state_hp_mode_0": "Automatický",
+    "state_hp_mode_1": "Pouze TČ",
+    "state_hp_mode_3": "Pouze bivalence",
+    "state_hp_mode_4": "Vypnuto",
+    "state_hp_mode_5": "Manuální",
+    "state_hp_mode_6": "Chlazení",
+    "state_regulation_type_0": "AcondTherm",
+    "state_regulation_type_1": "Ekvitermní",
+    "state_regulation_type_2": "Standard",
+    "state_thermal_power_1": "12 kW",
+    "state_thermal_power_2": "5 kW",
+    "state_thermal_power_6": "20 kW",
+    "state_silent_mode_0": "Off",
+    "state_silent_mode_1": "On",
+    "unknown_silent_mode": "Unknown state {code}",
+    "invalid_silent_time": "Out of integration range: {minutes} min"
   }
 }
